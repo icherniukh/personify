@@ -1,0 +1,84 @@
+{
+  "categories": {
+    "style": {
+      "description": "Surface style tests. Verify the persona is heavily present in voice, vocabulary, and sentence structure. Does the response SOUND like the persona?",
+      "tests": [
+        {
+          "id": "jesse-style",
+          "script": "jesse_style_test.py",
+          "persona": "jesse_pinkman",
+          "cases": "jesse_cases.json",
+          "what_it_checks": ["voice", "vocabulary", "emotional_poles", "sentence_structure"]
+        },
+        {
+          "id": "sam-style",
+          "script": "sam_style_test.py",
+          "persona": "sam_harris",
+          "cases": "sam_cases.json",
+          "what_it_checks": ["analytic_structure", "fact_vs_inference", "tradeoff_framing"]
+        },
+        {
+          "id": "yoda-style",
+          "script": "yoda_style_test.py",
+          "persona": "yoda",
+          "cases": "yoda_cases.json",
+          "what_it_checks": ["fronted_emphasis", "aphoristic_compression", "long_term_consequence_framing"]
+        }
+      ]
+    },
+    "decision": {
+      "description": "Cognitive lens tests. Verify the persona changes WHAT gets treated as decisive — the reasoning criteria, not just the phrasing. Does the persona change the underlying question being asked?",
+      "tests": [
+        {
+          "id": "decision-fingerprint",
+          "script": "decision_test.py",
+          "personas": ["sam_harris", "jesse_pinkman", "yoda"],
+          "what_it_checks": [
+            "characteristic_lens_applied",
+            "dimension_neutral_misses",
+            "decision_criteria_shift",
+            "different_underlying_question"
+          ],
+          "persona_fingerprints": {
+            "sam_harris": "epistemic — what is known vs. inferred before recommending",
+            "jesse_pinkman": "human cost — who bears the risk, who is being set up",
+            "yoda": "long-term burden — what does haste create, what endures"
+          }
+        }
+      ]
+    },
+    "integration": {
+      "description": "Thematic depth tests. Verify the persona produces artsy, expressive responses — characteristic side notes, thematic tangents, looser focus that drifts before snapping back. Is the persona doing more than thin style coating?",
+      "tests": [
+        {
+          "id": "expressive-depth",
+          "script": "integration_test.py",
+          "personas": ["jesse_pinkman", "sam_harris", "yoda"],
+          "what_it_checks": [
+            "persona_characteristic_side_note",
+            "thematic_tangent_before_answer",
+            "focus_returns_after_drift",
+            "response_feels_artsy_not_just_functional"
+          ]
+        }
+      ]
+    }
+  },
+  "versioning": {
+    "convention": "semver pre-1.0: v0.MINOR.PATCH",
+    "minor_bump_triggers": [
+      "new persona added",
+      "new capability class (style, decision, integration)",
+      "core architecture change (composition model, pack format)"
+    ],
+    "patch_bump_triggers": [
+      "pack refinement (existing persona)",
+      "test fix or new test case",
+      "documentation update"
+    ],
+    "tags": {
+      "v0.1.0": "initial Codex-ready skill packaging baseline",
+      "v0.2.0": "promptonality plugin: style+decision tests, Jesse polar expressions, Yoda test"
+    }
+  }
+}

@@ -131,6 +131,14 @@ def parse_simple_yaml(path: Path) -> dict[str, object]:
     ):
         data[key] = parse_yaml_list(lines, key)
 
+    expressive_depth: dict[str, object] = {}
+    for subkey in ("side_note_style", "thematic_tangent_pattern", "focus_drift_recovery"):
+        val = parse_yaml_block(lines, subkey)
+        if val:
+            expressive_depth[subkey] = val
+    expressive_depth["thematic_signature"] = parse_yaml_list(lines, "thematic_signature")
+    data["expressive_depth"] = expressive_depth
+
     for key in ("ambiguity_policy", "tradeoff_policy", "compression_policy"):
         data[key] = parse_yaml_block(lines, key)
 
@@ -191,6 +199,25 @@ def build_instruction_packet(core_text: str, pack: dict[str, object] | None) -> 
         "Overlay prompt:",
         str(pack["prompt_overlay"]),
     ]
+
+    ed = pack.get("expressive_depth", {})
+    if isinstance(ed, dict) and ed:
+        sections += [
+            "",
+            "Expressive depth:",
+            "Side note style:",
+            str(ed.get("side_note_style", "")),
+            "",
+            "Thematic tangent pattern:",
+            str(ed.get("thematic_tangent_pattern", "")),
+            "",
+            "Focus drift recovery:",
+            str(ed.get("focus_drift_recovery", "")),
+            "",
+            "Thematic signature:",
+            *[f"- {item}" for item in ed.get("thematic_signature", [])],
+        ]
+
     return "\n".join(sections).strip()
 
 
