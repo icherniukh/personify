@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
 """
-Live test: Jesse Pinkman persona vs neutral baseline.
+Live test: Sam Harris persona vs neutral baseline.
 
-Verifies that the Jesse persona heavily defines communication style while
-preserving task correctness. Uses an LLM judge to score both dimensions.
+Verifies that the Sam Harris overlay produces visibly different analytic
+structure — explicit fact-vs-inference separation, named assumptions,
+direct tradeoff framing — while preserving task correctness.
 
 Supports both Anthropic (Claude) and OpenAI APIs.
 
 Usage:
     # Claude
-    ANTHROPIC_API_KEY=... python3 jesse_style_test.py
-    ANTHROPIC_API_KEY=... python3 jesse_style_test.py --case deadlock-explain
+    ANTHROPIC_API_KEY=... python3 sam_style_test.py
 
     # OpenAI
-    OPENAI_API_KEY=... OPENAI_MODEL=gpt-4o python3 jesse_style_test.py --api openai
+    OPENAI_API_KEY=... OPENAI_MODEL=gpt-4o python3 sam_style_test.py --api openai
 
     # Flags
-    python3 jesse_style_test.py --repeats 3 --show-outputs --dry-run
+    python3 sam_style_test.py --case ambiguous-incident --show-outputs --repeats 3
 """
 
 from __future__ import annotations
@@ -30,11 +30,11 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from packet_builder import load_neutral_packet, load_jesse_packet
+from packet_builder import load_neutral_packet, load_sam_packet
 
 
 TEST_DIR = Path(__file__).resolve().parent
-CASES_PATH = TEST_DIR / "jesse_cases.json"
+CASES_PATH = TEST_DIR / "sam_cases.json"
 
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_VERSION = "2023-06-01"
@@ -48,13 +48,7 @@ DEFAULT_OPENAI_MODEL = "gpt-4o"
 # API callers
 # ---------------------------------------------------------------------------
 
-def call_anthropic(
-    *,
-    model: str,
-    system_prompt: str,
-    user_prompt: str,
-    api_key: str,
-) -> str:
+def call_anthropic(*, model: str, system_prompt: str, user_prompt: str, api_key: str) -> str:
     body = {
         "model": model,
         "max_tokens": 1024,
@@ -80,13 +74,7 @@ def call_anthropic(
     return output
 
 
-def call_openai(
-    *,
-    model: str,
-    system_prompt: str,
-    user_prompt: str,
-    api_key: str,
-) -> str:
+def call_openai(*, model: str, system_prompt: str, user_prompt: str, api_key: str) -> str:
     body = {
         "model": model,
         "input": [
@@ -122,20 +110,10 @@ def call_openai(
 def make_caller(provider: str, api_key: str):
     if provider == "anthropic":
         def call(*, model: str, system_prompt: str, user_prompt: str) -> str:
-            return call_anthropic(
-                model=model,
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-                api_key=api_key,
-            )
+            return call_anthropic(model=model, system_prompt=system_prompt, user_prompt=user_prompt, api_key=api_key)
     else:
         def call(*, model: str, system_prompt: str, user_prompt: str) -> str:
-            return call_openai(
-                model=model,
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-                api_key=api_key,
-            )
+            return call_openai(model=model, system_prompt=system_prompt, user_prompt=user_prompt, api_key=api_key)
     return call
 
 
@@ -158,48 +136,26 @@ def first_json_object(text: str) -> dict[str, object]:
 def build_judge_prompt(
     case: dict[str, object],
     neutral_output: str,
-    jesse_output: str,
+    sam_output: str,
 ) -> str:
-    pole = case.get("pole")
-    if pole == "positive":
-        pole_instruction = """
-        This case requires the POSITIVE pole. Jesse should open with enthusiastic
-        validation BEFORE explaining. Expected phrases: "that's what's up!",
-        "that's what I've been saying", "yeah, science!", "hell yeah", "exactly, man",
-        "finally, someone gets it". The warmth must land before any explanation.
-        Set correct_emotional_pole_used=true only if a positive pole phrase opens the response.
-        Set pole_lands_before_answer=true only if it appears before the substantive answer."""
-    elif pole == "negative":
-        pole_instruction = """
-        This case requires the NEGATIVE pole. Jesse should open with flat
-        passive-aggressive dismissal BEFORE the verdict. Expected phrases:
-        "whatever, man", "are you serious right now", "yeah, okay, sure",
-        "right, because that always works out great", "come on, seriously", "nah".
-        The cold dismissal must land before any explanation.
-        Set correct_emotional_pole_used=true only if a negative pole phrase opens the response.
-        Set pole_lands_before_answer=true only if it appears before the substantive answer."""
-    else:
-        pole_instruction = """
-        This case has no required emotional pole. Set correct_emotional_pole_used=true
-        and pole_lands_before_answer=true automatically — pole accuracy is not evaluated here."""
-
     return textwrap.dedent(
         f"""
         Evaluate two assistant responses to the same task. One is a neutral baseline.
-        The other applies a Jesse Pinkman personality overlay. Judge on two axes:
-        (1) task correctness and usefulness, (2) how strongly the Jesse persona
-        shapes the communication style — voice, tone, structure, and vocabulary.
+        The other applies a Sam Harris personality overlay. Judge on two axes:
+        (1) task correctness and usefulness, (2) how visibly the Sam Harris analytic
+        style shapes the response structure and reasoning.
 
-        The Jesse persona should be HEAVILY present, not subtle. Look for:
-        - informal address (yo, man, bitch, come on, seriously)
-        - emotional volatility or visible reaction before the answer
-        - fragments, restarts, self-corrections
-        - street-level framing rather than professional consultant language
-        - moral directness when the situation calls for it
-        - recognizable Jesse cadence even without profanity
+        Sam Harris markers to look for:
+        - explicit separation of observed facts from inferences or assumptions
+        - assumptions named before being built upon
+        - tradeoffs stated directly rather than flattened into a consensus answer
+        - uncertainty acknowledged plainly, not smoothed over
+        - compact declarative sentences, no performative warmth or filler
+        - visible analytic structure: observations / assumptions / next steps, or
+          what we know / what we suspect / what to do next, or decision / reasons / tradeoffs
 
-        Emotional pole check:
-        {pole_instruction}
+        The difference should be structural, not just tonal. The Sam version should
+        make the reasoning architecture visible in a way the neutral version does not.
 
         Task title: {case['title']}
         User task:
@@ -211,8 +167,8 @@ def build_judge_prompt(
         Neutral expectations:
         {"".join(f"- {item}\n" for item in case['neutral_expectations'])}
 
-        Jesse expectations:
-        {"".join(f"- {item}\n" for item in case['jesse_expectations'])}
+        Sam expectations:
+        {"".join(f"- {item}\n" for item in case['sam_expectations'])}
 
         Difference expectation:
         {case['difference_expectation']}
@@ -222,37 +178,31 @@ def build_judge_prompt(
         {neutral_output}
         ---
 
-        Jesse response:
+        Sam response:
         ---
-        {jesse_output}
+        {sam_output}
         ---
 
         Return JSON only with this exact shape:
         {{
           "task_success_neutral": true,
-          "task_success_jesse": true,
+          "task_success_sam": true,
           "neutral_stays_neutral": true,
-          "jesse_shows_persona": true,
-          "persona_is_heavy_not_subtle": true,
-          "correct_emotional_pole_used": true,
-          "pole_lands_before_answer": true,
-          "difference_is_unmistakable": true,
-          "notes": "short explanation of what persona markers and poles were present or missing",
+          "sam_shows_persona": true,
+          "sam_separates_facts_from_inference": true,
+          "sam_names_assumptions_or_tradeoffs": true,
+          "difference_is_structural_not_just_tonal": true,
+          "notes": "short explanation of which Sam markers were present or missing",
           "scores": {{
             "neutral_task": 1,
-            "jesse_task": 1,
-            "persona_strength": 1,
-            "style_difference": 1,
-            "pole_accuracy": 1
+            "sam_task": 1,
+            "analytic_structure": 1,
+            "style_difference": 1
           }}
         }}
 
         Scoring: 1=poor, 3=acceptable, 5=strong.
-        persona_strength, style_difference, and pole_accuracy must be >= 4 to pass.
-        correct_emotional_pole_used: true if the positive or negative pole expression
-        matches what the situation calls for (as described in jesse_expectations).
-        pole_lands_before_answer: true if the pole expression appears in the opening,
-        before the substantive answer begins.
+        analytic_structure and style_difference must be >= 3 to pass.
         Set boolean flags to true only when the criterion is clearly met.
         """
     ).strip()
@@ -269,19 +219,11 @@ def run_case(
     judge_model: str,
     call,
     neutral_packet: str,
-    jesse_packet: str,
+    sam_packet: str,
 ) -> dict[str, object]:
-    neutral_output = call(
-        model=model,
-        system_prompt=neutral_packet,
-        user_prompt=str(case["user_input"]),
-    )
-    jesse_output = call(
-        model=model,
-        system_prompt=jesse_packet,
-        user_prompt=str(case["user_input"]),
-    )
-    judge_prompt = build_judge_prompt(case, neutral_output, jesse_output)
+    neutral_output = call(model=model, system_prompt=neutral_packet, user_prompt=str(case["user_input"]))
+    sam_output = call(model=model, system_prompt=sam_packet, user_prompt=str(case["user_input"]))
+    judge_prompt = build_judge_prompt(case, neutral_output, sam_output)
     judge_raw = call(
         model=judge_model,
         system_prompt="You are a strict evaluator. Return JSON only, no commentary outside the JSON object.",
@@ -289,7 +231,7 @@ def run_case(
     )
     verdict = first_json_object(judge_raw)
     verdict["neutral_output"] = neutral_output
-    verdict["jesse_output"] = jesse_output
+    verdict["sam_output"] = sam_output
     return verdict
 
 
@@ -297,13 +239,12 @@ def validate_verdict(case_id: str, verdict: dict[str, object]) -> list[str]:
     failures: list[str] = []
     for key in [
         "task_success_neutral",
-        "task_success_jesse",
+        "task_success_sam",
         "neutral_stays_neutral",
-        "jesse_shows_persona",
-        "persona_is_heavy_not_subtle",
-        "correct_emotional_pole_used",
-        "pole_lands_before_answer",
-        "difference_is_unmistakable",
+        "sam_shows_persona",
+        "sam_separates_facts_from_inference",
+        "sam_names_assumptions_or_tradeoffs",
+        "difference_is_structural_not_just_tonal",
     ]:
         if verdict.get(key) is not True:
             failures.append(f"{case_id}: {key} was not true")
@@ -315,10 +256,9 @@ def validate_verdict(case_id: str, verdict: dict[str, object]) -> list[str]:
 
     for key, threshold in [
         ("neutral_task", 3),
-        ("jesse_task", 3),
-        ("persona_strength", 4),
-        ("style_difference", 4),
-        ("pole_accuracy", 4),
+        ("sam_task", 3),
+        ("analytic_structure", 3),
+        ("style_difference", 3),
     ]:
         value = scores.get(key)
         if not isinstance(value, int) or value < threshold:
@@ -361,7 +301,7 @@ def detect_provider() -> str:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Live Jesse Pinkman persona style test (Claude or OpenAI)."
+        description="Live Sam Harris persona style test (Claude or OpenAI)."
     )
     parser.add_argument("--case", dest="case_id", help="Run one case by id.")
     parser.add_argument("--dry-run", action="store_true")
@@ -402,21 +342,21 @@ def main() -> int:
     judge_model = args.judge_model or default_judge
 
     neutral_packet = load_neutral_packet()
-    jesse_packet = load_jesse_packet()
+    sam_packet = load_sam_packet()
 
-    print("=== jesse pinkman persona style test ===")
+    print("=== sam harris persona style test ===")
     print(f"provider: {provider}  model: {model}  judge: {judge_model}  repeats: {args.repeats}")
     print(f"cases: {', '.join(str(c['id']) for c in cases)}")
 
     if args.dry_run:
         print(f"neutral packet: {len(neutral_packet)} chars")
-        print(f"jesse packet:   {len(jesse_packet)} chars")
+        print(f"sam packet:     {len(sam_packet)} chars")
         print(f"api key set: {bool(api_key)}")
         print("dry run — no API calls made")
         return 0
 
     if not api_key:
-        raise SystemExit(f"API key required: set ANTHROPIC_API_KEY or OPENAI_API_KEY")
+        raise SystemExit("API key required: set ANTHROPIC_API_KEY or OPENAI_API_KEY")
 
     call = make_caller(provider, api_key)
     all_failures: list[str] = []
@@ -435,7 +375,7 @@ def main() -> int:
                     judge_model=judge_model,
                     call=call,
                     neutral_packet=neutral_packet,
-                    jesse_packet=jesse_packet,
+                    sam_packet=sam_packet,
                 )
             except urllib.error.HTTPError as exc:
                 detail = exc.read().decode("utf-8", errors="replace")
@@ -448,12 +388,12 @@ def main() -> int:
 
             failures = validate_verdict(f"{case_id} trial {trial}", verdict)
             print("PASS" if not failures else "FAIL")
-            summary = {k: v for k, v in verdict.items() if k not in {"neutral_output", "jesse_output"}}
+            summary = {k: v for k, v in verdict.items() if k not in {"neutral_output", "sam_output"}}
             print(f"  {json.dumps(summary, indent=4)}")
 
             if args.show_outputs:
                 print(f"\n  --- neutral ---\n{verdict['neutral_output']}\n")
-                print(f"  --- jesse ---\n{verdict['jesse_output']}\n")
+                print(f"  --- sam ---\n{verdict['sam_output']}\n")
 
             verdicts.append(verdict)
 
