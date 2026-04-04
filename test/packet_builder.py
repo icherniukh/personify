@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parents[1]
 CORE_SKILL = ROOT_DIR / "skills" / "orchestrator-core" / "SKILL.md"
 SAM_PACK = ROOT_DIR / "assets" / "personalities" / "sam-harris.yaml"
+JESSE_PACK = ROOT_DIR / "assets" / "personalities" / "jesse-pinkman.yaml"
 ARCH_REVIEW_CORE = ROOT_DIR / "skills" / "architecture-review-core" / "SKILL.md"
 BJARNE_PACK = ROOT_DIR / "assets" / "personalities" / "bjarne-stroustrup.yaml"
 YODA_PACK = ROOT_DIR / "assets" / "personalities" / "yoda.yaml"
@@ -199,6 +200,10 @@ def load_neutral_packet() -> str:
 
 def load_sam_packet() -> str:
     return load_packet(CORE_SKILL, SAM_PACK)
+
+
+def load_jesse_packet() -> str:
+    return load_packet(CORE_SKILL, JESSE_PACK)
 
 
 def load_packet(core_path: Path, pack_path: Path | None = None) -> str:
