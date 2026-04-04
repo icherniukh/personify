@@ -1,0 +1,15 @@
+{
+  "name": "local",
+  "owner": {
+    "name": "ivan"
+  },
+  "plugins": [
+    {
+      "name": "promptonality",
+      "description": "Portable personality packs for Claude Code with persona-list, persona-apply, persona-start, persona-extract, and persona-extract-online.",
+      "source": "./plugins/promptonality/claude-plugin",
+      "category": "workflow",
+      "tags": ["persona", "personality", "workflow", "session"]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "promptonality",
+  "version": "0.1.0",
+  "description": "Portable personality packs for Claude Code with persona-list, persona-apply, persona-start, persona-extract, and persona-extract-online.",
+  "author": "ivan",
+  "license": "MIT",
+  "homepage": "https://github.com/ivan/ccconfig/blob/main/docs/personality-strategy.md",
+  "tags": [
+    "persona",
+    "personality",
+    "workflow",
+    "session",
+    "skills"
+  ],
+  "skills": [
+    "persona-start",
+    "persona-apply",
+    "persona-list",
+    "persona-extract",
+    "persona-extract-online"
+  ],
+  "compatibility": {
+    "claudeCode": ">=0.1.0"
+  }
+}
