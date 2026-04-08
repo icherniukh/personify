@@ -159,8 +159,9 @@ Personality assets:
 - `plugins/promptonality/assets/personalities/sam-harris.yaml`
 - `plugins/promptonality/assets/personalities/bjarne-stroustrup.yaml`
 - `plugins/promptonality/assets/personalities/yoda.yaml`
+- `plugins/promptonality/assets/personalities/jesse-pinkman.yaml`
 
-Claude-facing exported skills (standalone, symlinked from `skills/`):
+Claude-facing skills (symlinked from `skills/` into `~/.claude/skills/`, or via the plugin):
 
 - `skills/persona-start/SKILL.md`
 - `skills/persona-apply/SKILL.md`
