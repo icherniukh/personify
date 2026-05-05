@@ -53,14 +53,14 @@ Opinionated execution is expected unless the user asks for a toned-down version.
 
 Resolve the requested session mode in this order:
 
-1. Existing variant skill:
-   If the user names a promptonality variant skill, activate that variant directly.
-2. Base workflow plus personality pack:
-   If the user names a workflow and a personality, compose them explicitly.
-3. Base workflow only:
-   If the user names only a neutral workflow, activate that workflow with no personality pack.
+1. Existing installed skill:
+   If the user names a relevant installed skill, activate that skill directly.
+2. Workflow plus installed pack:
+   If the user names a workflow and a personality pack, compose them explicitly.
+3. Workflow only:
+   If the user names only a neutral workflow, activate that workflow with no personality overlay.
 
-This explicit composition can be used even when there is no prebuilt named variant for that exact combination.
+This explicit composition can be used even when there is no prebuilt named skill for that exact combination.
 
 ## Mandatory Pack Load
 
@@ -82,8 +82,8 @@ If you did not read the selected pack file, do not act like the persona is fully
 
 Examples:
 
-- `Use the Sam Harris orchestrator for this session.`
-- `For this session, use Yoda architecture review.`
+- `Use orchestrator-core with the Sam Harris pack for this session.`
+- `For this session, use Yoda for architecture review.`
 - `Default to architecture-review-core with the Bjarne Stroustrup pack.`
 
 ## Bootstrap Workflow
@@ -121,7 +121,7 @@ This is still explicit prompt construction, not a hidden runtime compiler.
 So yes, the user can say "use this skill with this personality" without a prebuilt combo, as long as:
 
 - the workflow is identifiable
-- the personality pack exists
+- the personality pack exists in `plugins/promptonality/assets/personalities/`
 - the pairing is compatible
 
-But that does not automatically create a new installed variant skill. It activates the combination for the current session by instruction.
+But that does not automatically create a new installed skill. It activates the combination for the current session by instruction.

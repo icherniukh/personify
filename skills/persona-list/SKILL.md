@@ -33,16 +33,16 @@ For each installed pack, report:
 - `quality_level`
 - `summary`
 
-If useful, also point out likely pairings with current packaged workflows or variants.
+If useful, also point out likely pairings with current packaged workflows such as `orchestrator-core` or `architecture-review-core`.
 
 ## Important Distinction
 
-Listing a personality pack does not mean every possible workflow-plus-pack combination already exists as a named variant skill.
+Listing a personality pack does not mean every possible workflow-plus-pack combination already exists as a named installed skill.
 
 A pack can still be used in two ways:
 
-1. Existing named variant:
-   Use a prepared wrapper such as `sam-harris-orchestrator`.
+1. Existing named skill:
+   Use a prepared installed skill if one already exists.
 2. Explicit composition:
    Use `persona-apply`, `persona-start`, or direct instruction to combine a compatible workflow with an installed pack even if no dedicated wrapper has been created yet.
 

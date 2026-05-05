@@ -60,9 +60,9 @@ Funny, thematic, or highly flavored delivery is a feature here, not a bug, as lo
 
 Resolve the requested composition in this order:
 
-1. Existing variant skill:
-   If the requested combo already exists as a named variant, use that variant.
-2. Base workflow plus installed pack:
+1. Existing installed skill:
+   If the requested combo already exists as a named installed skill, use that skill.
+2. Workflow plus installed pack:
    If the workflow and pack both exist, compose them explicitly for the requested scope.
 3. Task plus installed pack:
    If the user names only a pack and a task, apply the pack directly to the task while preserving correctness and usefulness.
@@ -100,14 +100,14 @@ This skill does not create a new installed variant.
 
 It performs ad-hoc composition for the requested scope using:
 
-- an existing variant skill, when one is available
+- an existing installed skill, when one is available
 - or explicit prompt-level composition, when no dedicated wrapper exists yet
 
 ## Example Requests
 
 - `Use architecture-review-core with Yoda for this task.`
-- `Apply the Sam Harris personality to this planning workflow.`
-- `Use this skill with the Bjarne Stroustrup personality, but only for this thread.`
+- `Apply the Sam Harris pack to this planning workflow.`
+- `Use the Bjarne Stroustrup pack, but only for this thread.`
 
 
 ## Bundled Personality Packs
