@@ -55,6 +55,8 @@ def main() -> None:
 
     print("4. generated support files")
     assert (CLAUDE_PLUGIN_DIR / "README.md").is_file()
+    assert not list(CLAUDE_PLUGIN_DIR.rglob("__pycache__")), "generated Claude plugin should not include __pycache__ directories"
+    assert not list(CLAUDE_PLUGIN_DIR.rglob("*.pyc")), "generated Claude plugin should not include .pyc files"
     print("ok")
 
     print("=== Claude plugin test passed ===")

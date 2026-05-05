@@ -16,7 +16,9 @@ Included skills:
 - `persona-extract`
 - `persona-extract-online`
 
-The source of truth remains:
+Source of truth:
 
 - `plugins/promptonality/`
 - `skills/persona-*/`
+
+Regenerate this package after source changes before installing or publishing it.

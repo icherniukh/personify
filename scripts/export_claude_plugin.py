@@ -30,6 +30,22 @@ def write_text(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
+def package_ignore(_dir: str, names: list[str]) -> set[str]:
+    ignored: set[str] = set()
+    for name in names:
+        if name == "__pycache__" or name.endswith(".pyc"):
+            ignored.add(name)
+    return ignored
+
+
+def included_files(root: Path) -> list[Path]:
+    return sorted(
+        path.relative_to(root)
+        for path in root.rglob("*")
+        if path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc"
+    )
+
+
 def export_manifest() -> str:
     codex_manifest = json.loads(CODEX_PLUGIN_JSON.read_text(encoding="utf-8"))
     payload = {
@@ -73,10 +89,12 @@ Included skills:
 - `persona-extract`
 - `persona-extract-online`
 
-The source of truth remains:
+Source of truth:
 
 - `plugins/promptonality/`
 - `skills/persona-*/`
+
+Regenerate this package after source changes before installing or publishing it.
 """
 
 
@@ -85,7 +103,7 @@ def sync_skill(skill_name: str) -> None:
     dst = CLAUDE_PLUGIN_DIR / "skills" / skill_name
     if dst.exists():
         shutil.rmtree(dst)
-    shutil.copytree(src, dst)
+    shutil.copytree(src, dst, ignore=package_ignore)
 
 
 def check_skill(skill_name: str) -> bool:
@@ -93,8 +111,8 @@ def check_skill(skill_name: str) -> bool:
     dst = CLAUDE_PLUGIN_DIR / "skills" / skill_name
     if not dst.exists():
         return False
-    src_files = sorted(path.relative_to(src) for path in src.rglob("*") if path.is_file())
-    dst_files = sorted(path.relative_to(dst) for path in dst.rglob("*") if path.is_file())
+    src_files = included_files(src)
+    dst_files = included_files(dst)
     if src_files != dst_files:
         return False
     for relative_path in src_files:
