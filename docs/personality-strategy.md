@@ -1,59 +1,132 @@
 # Personality Strategy
 
-This document defines the repo’s approach to personality and persona handling, especially for Codex.
+This document defines the product promise for `promptonality`.
 
-## Core Decision
+## Core Promise
 
-Do **not** model personalities by spreading persona text across unrelated skills.
+`promptonality` is not a catalog of famous-persona skills.
 
-Use a separate personality-oriented plugin instead.
+It is a framework for treating personas as portable assets that can be created,
+updated, validated, packaged, and composed with many workflows.
 
-## Why a Separate Plugin
+The bundled personas are starter assets and regression fixtures. They prove the
+asset format and the composition path. They are not the boundary of the system.
+The normal user path should be:
+
+1. Start with bundled example packs.
+2. Add or generate private persona packs.
+3. Update those packs over time.
+4. Compose any valid pack with a compatible workflow.
+5. Keep generated install surfaces in sync without hand-maintaining forks.
+
+If the framework requires code changes or a new wrapper skill for every persona,
+the framework has failed its own promise.
+
+## Fundamental Guarantees
+
+The project should make these things true:
+
+- A persona is a data asset, not a hardcoded behavior branch.
+- A valid persona pack can be added without editing test scripts, manifests, or
+  workflow skills.
+- Pack discovery is dynamic wherever the host runtime allows it.
+- Pack validation applies to every discovered pack, including user-created packs.
+- Built-in packs are examples, not special cases.
+- Workflows and persona packs evolve independently.
+- Generated Claude, Codex, and Gemini surfaces are derived outputs, not authored
+  forks.
+- Composition is explicit: base workflow first, persona asset second.
+- Host model and platform boundaries remain outside the persona asset.
+- Persona assets do not carry local guardrail or restriction sections.
+
+The strategic question is not "which personas are bundled?" It is "can this
+system reliably carry any well-formed persona asset through discovery,
+composition, evaluation, and packaging?"
+
+## Why a Plugin
 
 Personality is cross-cutting:
 
 - it can apply to many domains
 - it is not the same thing as workflow logic
-- it benefits from shared assets, conventions, and packaging
+- it benefits from shared assets, validation, generators, and packaging
+- users need a place to store and evolve their own packs
 
-A separate plugin lets the repo keep:
+A separate plugin keeps domain skills focused on execution while giving persona
+assets a coherent home.
 
-- domain skills focused on execution
-- personality logic reusable and centralized
-- future Codex UI metadata and dependencies bundled cleanly
+## Persona Assets
 
-## Core Idea
-
-Treat personality as a bounded cognitive lens.
-
-That means the plugin should not merely control tone. It should control how the same underlying workflow:
+A persona pack is a bounded cognitive lens. It should influence how a workflow:
 
 - frames the problem
 - exposes assumptions
 - handles ambiguity
 - reveals tradeoffs
 - compresses information
-- prefers certain answer structures
+- chooses answer structures
+- speaks and interacts with the user
 
-When a user explicitly assigns a persona through `persona-apply` or `persona-start`, the surface style should also be clearly noticeable by default.
-The right target is not a barely detectable accent.
-The right target is recognizable voice plus recognizable framing, while still staying inside the workflow's correctness and safety bounds.
+A pack is not:
+
+- a full workflow
+- a replacement for domain logic
+- a static installed skill
+- a one-off prompt fragment with no schema
+- a bundled-only product feature
+- a restriction list
+
+Reusable packs should stay workflow-agnostic unless the persona is intentionally
+domain-specific. Domain instructions belong in workflow cores or task-specific
+instructions, not in general persona assets.
+
+Pack-level guardrails were intentionally removed. They made personas less
+creative, and the host model already supplies the necessary behavioral
+boundaries. The framework should enforce quality by validating structure and
+evaluating actual outputs, not by adding local restriction sections to every
+pack.
+
+## Asset Lifecycle
+
+The framework should support this lifecycle:
+
+1. **Create**
+   Generate or write a pack using the personality-pack contract.
+2. **Store**
+   Keep packs in an asset directory with stable ids and provenance.
+3. **Validate**
+   Check every pack against the contract, not a hardcoded allowlist.
+4. **Discover**
+   List available packs from the active asset roots.
+5. **Compose**
+   Apply a selected pack to a workflow or task.
+6. **Evaluate**
+   Test whether the pack changes reasoning, framing, and voice in useful ways.
+7. **Iterate**
+   Update the pack as a living asset without rebuilding the framework.
+8. **Package**
+   Export generated surfaces from source assets.
+
+This lifecycle is the project. The bundled pack list is just seed data.
 
 ## Invariant vs Variable Layers
 
-### Invariant
+### Host Layer
 
-These should not change across personalities:
+These are not encoded inside persona packs:
 
 - task completion
 - truthfulness
-- safety
+- platform policy boundaries
 - operational competence
 - tool discipline
 
+The base workflow and host assistant own these guarantees. Persona packs should
+not restate them as local restriction sections.
+
 ### Variable
 
-These should be allowed to change:
+These are allowed to change by persona:
 
 - voice
 - framing priorities
@@ -62,191 +135,155 @@ These should be allowed to change:
 - compression style
 - answer structure
 - interaction stance
+- emotional temperature
+- rhetorical habits
 
-This is the key design shift: personality is not just a stylistic overlay. It is a portable way to change how the same capability thinks and communicates within hard operational bounds.
+Visible style is a feature when the user asks for it. The target is recognizable
+voice plus recognizable framing, still inside correctness and safety bounds.
 
-In practice, that means visible style is a feature, not an embarrassment.
-If the user asked for Jesse Pinkman, Yoda, or Sam Harris, the interaction should normally feel obviously flavored to someone who knows that persona.
-The system can rely on the user's prior familiarity rather than stopping to explain why the wording is stylized.
-Persona assignment through `persona-apply` or `persona-start` should therefore be applied unapologetically by default, not softened into a timid imitation just to preserve generic professionalism.
+## Composition Model
 
-The portable part matters. Reusable personality packs should stay workflow-agnostic unless a domain-specific pack is explicitly the goal. Domain instructions belong in the neutral workflow or the thin variant that consumes the pack.
+Composition has two required layers:
 
-## Relationship to Codex Global Personality
+1. **Base workflow**
+   The neutral task or workflow instructions that define how work gets done.
+2. **Persona asset**
+   A valid pack that defines voice, structure, and reasoning lens.
 
-Codex may expose a coarse global `personality` setting, but this repo should not depend on undocumented or custom semantics for that field.
+Entrypoint skills such as `persona-start`, `persona-apply`, and `persona-list`
+provide the user interface for discovery and composition. They should load packs
+from asset roots and should not assume the only valid packs are bundled ones.
 
-Working assumption:
+Dedicated per-persona wrapper skills are out of scope by default. They duplicate
+the asset model, create maintenance load, and imply that every workflow-pack
+pairing needs a new installed artifact.
 
-- global `personality` is broad style control
-- detailed persona behavior belongs at the skill/plugin layer
+## Discovery Model
 
-That avoids coupling the repo to behavior that is not yet documented as a stable extension point.
+The intended discovery model is asset-root based.
 
-For Codex, the install unit remains the plugin under `plugins/promptonality/`.
-
-For Claude, the repo now exports standalone skills under `skills/persona-*` from that same source using:
-
-```bash
-python3 plugins/promptonality/scripts/export_claude_skills.py
-```
-
-For Claude plugin packaging, the repo also generates:
+Current repo source:
 
 ```text
-plugins/promptonality/claude-plugin/
+plugins/promptonality/src/assets/personalities/
 ```
 
-with:
+Generated packages may bundle those packs under runtime-specific reference
+directories, such as:
+
+```text
+references/personality-packs/
+```
+
+Future user extension should allow additional local asset roots without editing
+the plugin source. The exact host-specific mechanism can vary, but the project
+promise should stay stable: users can bring their own packs, and the framework
+treats them as first-class assets once discovered and validated.
+
+## Relationship to Host Runtimes
+
+Codex, Claude, and Gemini have different packaging mechanics. `promptonality`
+should not pretend they are identical.
+
+The repo-owned source of truth is the platform-neutral source tree:
+
+```text
+plugins/promptonality/src/
+```
+
+Generated compatibility surfaces are derived from that source:
 
 ```bash
-python3 plugins/promptonality/scripts/export_claude_plugin.py
+python3 plugins/promptonality/scripts/package.py build --target all
 ```
 
-That keeps one conceptual system while supporting both Claude’s standalone skill installation model and its plugin package model.
+Generated outputs may have different shapes, but they should preserve the same
+conceptual system:
 
-## Plugin Direction
-
-Current plugin direction:
-
-- `promptonality`
-- with `persona-extract` and `persona-extract-online` as packaged extraction skills
-
-Current scope:
-
-- reusable personality packs
-- neutral workflow cores
-- `persona-start` and `persona-apply` for dynamic composition at session or task scope
-- personality catalog/listing so installed packs are discoverable
-- persona extraction skills for generating new packs
-
-Out of scope for the current version:
-
-- dedicated pre-built variant skills that fork a workflow per persona — dynamic composition via `persona-start` covers this without static artifacts
-- turning every skill into a persona-aware skill
-- encoding persona behavior in Claude-specific agent files
-- depending on hidden Codex config internals
+- persona assets are data
+- entrypoint skills discover and load assets
+- workflows remain separate
+- generated packages are checked for drift
 
 ## Current Implementation
 
-The repo now includes a local plugin under:
+The repo includes a local plugin under:
 
 ```text
 plugins/promptonality/
 ```
 
-That plugin demonstrates the intended split:
+Active source skills:
 
-- neutral workflow cores (no persona baked in)
-- standalone personality pack files (applied dynamically via `persona-start` or `persona-apply`)
-- persona entrypoint skills for session-wide or task-scope composition
-- extraction skills for generating new personality material
+- `plugins/promptonality/src/skills/persona-start/SKILL.md`
+- `plugins/promptonality/src/skills/persona-apply/SKILL.md`
+- `plugins/promptonality/src/skills/persona-list/SKILL.md`
+- `plugins/promptonality/src/skills/persona-extract/SKILL.md`
+- `plugins/promptonality/src/skills/persona-extract-online/SKILL.md`
+- `plugins/promptonality/src/skills/orchestrator-core/SKILL.md`
+- `plugins/promptonality/src/skills/architecture-review-core/SKILL.md`
 
-Current plugin skills:
+Source asset root:
 
-Persona skills (also exported as standalone):
-- `plugins/promptonality/skills/persona-start/SKILL.md`
-- `plugins/promptonality/skills/persona-apply/SKILL.md`
-- `plugins/promptonality/skills/persona-list/SKILL.md`
-- `plugins/promptonality/skills/persona-extract/SKILL.md`
-- `plugins/promptonality/skills/persona-extract-online/SKILL.md`
+- `plugins/promptonality/src/assets/personalities/`
 
-Neutral workflow cores (composed dynamically — no per-persona forks):
-- `plugins/promptonality/skills/orchestrator-core/SKILL.md`
-- `plugins/promptonality/skills/architecture-review-core/SKILL.md`
+The files in that directory are bundled starter packs. They should be discovered
+as a collection, not enumerated manually in docs or tests.
 
-Personality assets:
-- `plugins/promptonality/assets/personalities/sam-harris.yaml`
-- `plugins/promptonality/assets/personalities/bjarne-stroustrup.yaml`
-- `plugins/promptonality/assets/personalities/yoda.yaml`
-- `plugins/promptonality/assets/personalities/jesse-pinkman.yaml`
+## Reworking Extraction
 
-Claude-facing skills (symlinked from `skills/` into `~/.claude/skills/`, or via the plugin):
-
-- `skills/persona-start/SKILL.md`
-- `skills/persona-apply/SKILL.md`
-- `skills/persona-list/SKILL.md`
-- `skills/persona-extract/SKILL.md`
-- `skills/persona-extract-online/SKILL.md`
-
-Generated Claude plugin package:
-
-- `plugins/promptonality/claude-plugin/plugin.json`
-- `plugins/promptonality/claude-plugin/skills/persona-start/SKILL.md`
-- `plugins/promptonality/claude-plugin/skills/persona-apply/SKILL.md`
-- `plugins/promptonality/claude-plugin/skills/persona-list/SKILL.md`
-- `plugins/promptonality/claude-plugin/skills/persona-extract/SKILL.md`
-- `plugins/promptonality/claude-plugin/skills/persona-extract-online/SKILL.md`
-
-## Reworking `persona-extract`
-
-The extraction skills should feed the plugin, not sit beside it as disconnected prompt generators.
+The extraction skills should feed the asset lifecycle.
 
 Target responsibilities:
 
-- generate normalized personality packs
+- generate normalized packs
 - support fast local generation and research-backed generation
-- distinguish one-off prompts from reusable personality assets
-- make generated outputs easy to compose with other workflows later
+- distinguish one-off prompts from reusable persona assets
+- write outputs in the contract shape
+- make generated packs easy to add to an asset root
+- preserve provenance so later evaluation knows what kind of pack it is judging
 
-## Personality Pack Contract
+## Validation And Testing
 
-The plugin should standardize a reusable pack format.
+Tests should enforce the framework promise, not just protect the current bundled
+catalog.
 
-The contract is documented in:
+Validation should:
 
-- `docs/personality-pack-contract.md`
+- scan every pack in the active source asset root
+- check required fields and non-empty sections
+- reject duplicate ids
+- reject malformed YAML
+- verify generated packages contain the expected derived pack files
+- avoid hardcoded per-pack required-field blocks
+- reject reintroduction of pack-level `guardrails` or `anti_patterns` sections
 
-Important fields include:
+Evaluation should:
 
-- `voice`
-- `interaction_stance`
-- `value_profile`
-- `reasoning_style`
-- `default_structures`
-- `ambiguity_policy`
-- `tradeoff_policy`
-- `compression_policy`
-- `interaction_rules`
-- `guardrails`
-- `anti_patterns`
-- `prompt_overlay`
+- run representative prompts across selected packs and neutral baselines
+- distinguish recognizability from integration quality
+- detect catchphrase spam, shallow mimicry, and template reuse
+- measure whether the persona changes framing and reasoning priorities
+- support both bundled examples and user-created packs
 
-Interpretation:
+The first-class test question is: "does a valid asset compose correctly and
+remain useful?" Not: "did these four built-in personas pass?"
 
-- packs are overlays, not whole workflows
-- they should add positive cognitive value, not just style
-- they must remain bounded by the base workflow’s correctness and task guarantees
-- they should not silently override safety or operational competence
+Detailed evaluation guidance lives in:
 
-## Composition Rule
+- `docs/persona-evaluation.md`
 
-The composition model is:
+## What Is Out Of Scope
 
-- the **base workflow** supplies execution guarantees
-- the **personality pack** supplies voice, structure, and reasoning lens
-- `persona-start` or `persona-apply` applies the pack dynamically — no dedicated variant skill required
-
-Composition is explicit prompt construction, not a hidden runtime feature. The user names a workflow core and a pack; `persona-start` loads both and governs the session. No static fork of the workflow skill is created or needed.
-
-Dedicated per-persona variant skills are explicitly out of scope. They duplicate the composition mechanism, add maintenance burden, and imply a fork for every workflow-pack pairing. Dynamic application via `persona-start` covers the same ground without static artifacts.
-
-## Why Not Persona Metadata Everywhere
-
-Embedding persona logic into many unrelated skills would:
-
-- duplicate personality logic across files
-- make maintenance harder
-- blur the line between workflow knowledge and cognitive lens
-- make later pluginization more painful
-
-Keeping personality separate is the cleaner long-term model.
+- Treating bundled personas as the product boundary.
+- Requiring a static wrapper skill for every persona.
+- Turning every skill into a persona-aware skill.
+- Encoding persona behavior in unrelated agents.
+- Depending on undocumented host runtime internals as the only extension point.
+- Hand-maintaining generated package contents.
 
 ## Provenance
 
-This document condenses direction from:
-
-- `plugins/promptonality/skills/persona-extract/SKILL.md`
-- `plugins/promptonality/skills/persona-extract-online/SKILL.md`
-- repo cleanup work around Codex support
-- earlier design material in `up_claude/`
+This document replaces the older catalog-centered framing with an asset-centered
+framework promise. It keeps the earlier separation of workflow and persona logic,
+but makes user extension and living persona assets the center of the project.

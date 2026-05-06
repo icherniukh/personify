@@ -120,8 +120,8 @@ def load_cases() -> list[dict[str, object]]:
 
 
 def load_yoda_packet() -> str:
-    core = ROOT_DIR / "skills" / "orchestrator-core" / "SKILL.md"
-    pack = ROOT_DIR / "assets" / "personalities" / "yoda.yaml"
+    core = ROOT_DIR / "src" / "skills" / "orchestrator-core" / "SKILL.md"
+    pack = ROOT_DIR / "src" / "assets" / "personalities" / "yoda.yaml"
     return load_packet(core, pack)
 
 

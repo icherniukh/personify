@@ -1,106 +1,125 @@
 # Promptonality
 
-`promptonality` is the repo-local plugin for portable personality packs plus neutral workflow cores.
+`promptonality` is a platform-agnostic source package for portable persona
+assets and dynamic composition.
 
-The current model is dynamic composition:
+The project promise is asset-first:
 
-- keep workflow logic in neutral core skills
-- keep persona logic in standalone YAML packs
-- use `persona-start` or `persona-apply` to combine them at session or task scope
+- personas are YAML assets, not hardcoded skills
+- bundled personas are starter packs and regression fixtures
+- users should be able to add, update, validate, and compose their own packs
+- workflows stay separate from persona assets
+- generated install surfaces are derived outputs
+- persona packs do not include local guardrail or restriction sections
 
-Static per-persona wrapper skills are not the active install surface anymore. Historical examples remain under [`archive/`](./archive).
+If adding a persona requires changing framework code or creating a wrapper skill,
+that is a bug in the framework direction.
 
-## Installation Surfaces
+## Core Model
 
-### Codex
+The framework has three moving parts:
 
-Promptonality is implemented here as a repo-local plugin source:
+1. **Persona assets**
+   YAML packs stored under an asset root.
+2. **Entrypoint skills**
+   `persona-list`, `persona-apply`, and `persona-start` discover and load packs.
+3. **Workflows**
+   Neutral workflow instructions such as orchestration or architecture review.
 
-- manifest: [`.codex-plugin/plugin.json`](./.codex-plugin/plugin.json)
-- source skills: [`skills/`](./skills)
-- source packs: [`assets/personalities/`](./assets/personalities)
+Composition rule:
 
-Use this folder as the source of truth for Codex packaging work. Do not document a made-up stable `~/.codex/plugins/...` install path unless Codex runtime docs explicitly support one.
+- base workflow first
+- persona asset second
+- correctness, safety, and task completion win if the overlay conflicts
 
-### Claude Standalone Skills
+Static per-persona wrapper skills are not the active model. Historical examples
+remain under [`archive/`](./archive).
 
-The Claude-facing standalone persona skills are exported into the repo root under:
+Pack-level `guardrails`, `anti_patterns`, and similar restriction sections are
+intentionally not part of the current pack shape. They made personas less
+creative, while the host model already supplies the necessary behavioral
+boundaries. Improve packs by strengthening positive persona material and
+evaluating outputs, not by adding local prohibitions.
 
-- [`skills/persona-start/`](../../skills/persona-start)
-- [`skills/persona-apply/`](../../skills/persona-apply)
-- [`skills/persona-list/`](../../skills/persona-list)
-- [`skills/persona-extract/`](../../skills/persona-extract)
-- [`skills/persona-extract-online/`](../../skills/persona-extract-online)
+## Source Of Truth
 
-Regenerate them with:
+Use `src/` as the authored source:
 
-```bash
-python3 plugins/promptonality/scripts/export_claude_skills.py
+- neutral metadata: [`src/package.json`](./src/package.json)
+- source skills: [`src/skills/`](./src/skills)
+- source asset root: [`src/assets/personalities/`](./src/assets/personalities)
+
+Do not treat generated Codex, Claude, Gemini, or root-level compatibility copies
+as authored truth. Regenerate platform packages from source.
+
+## Persona Assets
+
+Bundled source packs live in:
+
+```text
+src/assets/personalities/
 ```
 
-### Claude Plugin Package
-
-The generated Claude plugin package lives under:
-
-- [`claude-plugin/`](./claude-plugin)
-
-Regenerate it with:
-
-```bash
-python3 plugins/promptonality/scripts/export_claude_plugin.py
-```
-
-## Current Structure
-
-Active plugin skills:
-
-- [`skills/orchestrator-core/SKILL.md`](./skills/orchestrator-core/SKILL.md)
-- [`skills/architecture-review-core/SKILL.md`](./skills/architecture-review-core/SKILL.md)
-- [`skills/persona-start/SKILL.md`](./skills/persona-start/SKILL.md)
-- [`skills/persona-apply/SKILL.md`](./skills/persona-apply/SKILL.md)
-- [`skills/persona-list/SKILL.md`](./skills/persona-list/SKILL.md)
-- [`skills/persona-extract/SKILL.md`](./skills/persona-extract/SKILL.md)
-- [`skills/persona-extract-online/SKILL.md`](./skills/persona-extract-online/SKILL.md)
-
-Bundled personality packs:
-
-- [`assets/personalities/sam-harris.yaml`](./assets/personalities/sam-harris.yaml)
-- [`assets/personalities/bjarne-stroustrup.yaml`](./assets/personalities/bjarne-stroustrup.yaml)
-- [`assets/personalities/yoda.yaml`](./assets/personalities/yoda.yaml)
-- [`assets/personalities/jesse-pinkman.yaml`](./assets/personalities/jesse-pinkman.yaml)
-
-Historical wrapper examples:
-
-- [`archive/sam-harris-orchestrator/SKILL.md`](./archive/sam-harris-orchestrator/SKILL.md)
-- [`archive/bjarne-stroustrup-architecture-review/SKILL.md`](./archive/bjarne-stroustrup-architecture-review/SKILL.md)
-- [`archive/yoda-architecture-review/SKILL.md`](./archive/yoda-architecture-review/SKILL.md)
-
-## Usage
-
-Use the neutral cores directly when you want the workflow behavior with no persona overlay.
-
-Use `persona-start` when you want a workflow-plus-pack combination to govern the whole session.
-
-Use `persona-apply` when you want the overlay for one task or thread only.
-
-Use `persona-list` when you want to inspect which packs are bundled, or run:
+List them with:
 
 ```bash
 python3 plugins/promptonality/scripts/persona_list.py
 ```
 
+The list is intentionally dynamic. Do not maintain a manual catalog in this
+README. New user-created or generated packs should follow the contract in:
+
+```text
+docs/personality-pack-contract.md
+```
+
+## Installation Surfaces
+
+Build all platform packages with:
+
+```bash
+python3 plugins/promptonality/scripts/package.py build --target all
+```
+
+Generated packages are ignored build outputs:
+
+- `codex/`
+- `claude/`
+- `gemini/`
+
+Codex, Claude, and Gemini are peer adapters. None is the canonical source.
+
+Use native local development flows for each host:
+
+- Codex: generated `.codex-plugin/plugin.json` under `codex/`
+- Claude: `claude --plugin-dir plugins/promptonality/claude`
+- Gemini: `gemini extensions link plugins/promptonality/gemini`
+
+## Active Source Skills
+
+- [`src/skills/persona-start/SKILL.md`](./src/skills/persona-start/SKILL.md)
+- [`src/skills/persona-apply/SKILL.md`](./src/skills/persona-apply/SKILL.md)
+- [`src/skills/persona-list/SKILL.md`](./src/skills/persona-list/SKILL.md)
+- [`src/skills/persona-extract/SKILL.md`](./src/skills/persona-extract/SKILL.md)
+- [`src/skills/persona-extract-online/SKILL.md`](./src/skills/persona-extract-online/SKILL.md)
+- [`src/skills/orchestrator-core/SKILL.md`](./src/skills/orchestrator-core/SKILL.md)
+- [`src/skills/architecture-review-core/SKILL.md`](./src/skills/architecture-review-core/SKILL.md)
+
+## Usage
+
+Use `persona-list` to inspect discovered packs.
+
+Use `persona-start` when a workflow-plus-pack combination should govern the
+session.
+
+Use `persona-apply` when the overlay should apply to one task or thread.
+
 Examples:
 
-- `Use orchestrator-core with the Sam Harris pack for this session.`
-- `Apply Yoda to this architecture review only.`
 - `List the available promptonality packs.`
+- `Use the Hikaru Nakamura persona for this architecture review.`
+- `Apply my local review-coach persona to this task.`
 - `Generate a new personality pack for this public figure.`
-
-Composition rule:
-
-- base workflow first
-- persona pack second
-- correctness, safety, and task completion win if the overlay conflicts
 
 ## Testing
 
@@ -110,16 +129,11 @@ Smoke test:
 bash plugins/promptonality/test/run-test.sh
 ```
 
-Claude standalone export sync:
+Package sync checks:
 
 ```bash
-python3 plugins/promptonality/scripts/export_claude_skills.py --check
-```
-
-Claude plugin export sync:
-
-```bash
-python3 plugins/promptonality/scripts/export_claude_plugin.py --check
+python3 plugins/promptonality/scripts/package.py check --target all
+python3 plugins/promptonality/scripts/package.py doctor
 ```
 
 Live model comparison:
@@ -134,4 +148,13 @@ Architecture comparison:
 ```bash
 OPENAI_API_KEY=... OPENAI_MODEL=... \
 python3 plugins/promptonality/test/architecture_live_test.py --repeats 3
+```
+
+Testing should move toward dynamic pack validation over every discovered asset,
+not hardcoded checks for a fixed bundled catalog.
+
+Persona quality evaluation is defined in:
+
+```text
+docs/persona-evaluation.md
 ```

@@ -6,8 +6,8 @@ from pathlib import Path
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-PERSONA_EXTRACT = ROOT_DIR / "skills" / "persona-extract" / "SKILL.md"
-PERSONA_EXTRACT_ONLINE = ROOT_DIR / "skills" / "persona-extract-online" / "SKILL.md"
+PERSONA_EXTRACT = ROOT_DIR / "src" / "skills" / "persona-extract" / "SKILL.md"
+PERSONA_EXTRACT_ONLINE = ROOT_DIR / "src" / "skills" / "persona-extract-online" / "SKILL.md"
 
 
 def assert_contains(text: str, needle: str) -> None:

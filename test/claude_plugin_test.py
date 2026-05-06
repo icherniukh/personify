@@ -8,9 +8,11 @@ from pathlib import Path
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-CLAUDE_PLUGIN_DIR = ROOT_DIR / "claude-plugin"
-PLUGIN_JSON = CLAUDE_PLUGIN_DIR / "plugin.json"
+CLAUDE_PLUGIN_DIR = ROOT_DIR / "claude"
+PLUGIN_JSON = CLAUDE_PLUGIN_DIR / ".claude-plugin" / "plugin.json"
 EXPECTED_SKILLS = (
+    "architecture-review-core",
+    "orchestrator-core",
     "persona-start",
     "persona-apply",
     "persona-list",
@@ -30,18 +32,8 @@ def main() -> None:
     print("ok")
 
     print("2. manifest shape")
-    for key in (
-        "author",
-        "license",
-        "homepage",
-        "tags",
-        "skills",
-        "compatibility",
-    ):
+    for key in ("author", "license", "homepage"):
         assert key in payload, f"missing {key}"
-    assert isinstance(payload["skills"], list)
-    assert payload["skills"] == list(EXPECTED_SKILLS)
-    assert payload["compatibility"]["claudeCode"].startswith(">=")
     print("ok")
 
     print("3. packaged skill layout")
@@ -55,6 +47,7 @@ def main() -> None:
 
     print("4. generated support files")
     assert (CLAUDE_PLUGIN_DIR / "README.md").is_file()
+    assert (CLAUDE_PLUGIN_DIR / ".claude-plugin" / "marketplace.json").is_file()
     assert not list(CLAUDE_PLUGIN_DIR.rglob("__pycache__")), "generated Claude plugin should not include __pycache__ directories"
     assert not list(CLAUDE_PLUGIN_DIR.rglob("*.pyc")), "generated Claude plugin should not include .pyc files"
     print("ok")

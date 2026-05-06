@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-PLUGIN_JSON = ROOT_DIR / ".codex-plugin" / "plugin.json"
+PLUGIN_JSON = ROOT_DIR / "codex" / ".codex-plugin" / "plugin.json"
 
 
 def main() -> None:
@@ -35,7 +35,7 @@ def main() -> None:
     for key in ("name", "email", "url"):
         assert key in payload["author"], f"missing author.{key}"
     assert payload["skills"].startswith("./")
-    assert (ROOT_DIR / payload["skills"].removeprefix("./")).is_dir()
+    assert (PLUGIN_JSON.parent.parent / payload["skills"].removeprefix("./")).is_dir()
     print("ok")
 
     print("3. interface metadata")
@@ -61,7 +61,7 @@ def main() -> None:
     print("ok")
 
     print("4. skill package layout")
-    skills_dir = ROOT_DIR / "skills"
+    skills_dir = ROOT_DIR / "codex" / "skills"
     skill_dirs = [path for path in skills_dir.iterdir() if path.is_dir()]
     assert skill_dirs, "no skills found"
     for skill_dir in skill_dirs:

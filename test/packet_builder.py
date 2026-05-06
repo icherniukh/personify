@@ -6,12 +6,12 @@ from pathlib import Path
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-CORE_SKILL = ROOT_DIR / "skills" / "orchestrator-core" / "SKILL.md"
-SAM_PACK = ROOT_DIR / "assets" / "personalities" / "sam-harris.yaml"
-JESSE_PACK = ROOT_DIR / "assets" / "personalities" / "jesse-pinkman.yaml"
-ARCH_REVIEW_CORE = ROOT_DIR / "skills" / "architecture-review-core" / "SKILL.md"
-BJARNE_PACK = ROOT_DIR / "assets" / "personalities" / "bjarne-stroustrup.yaml"
-YODA_PACK = ROOT_DIR / "assets" / "personalities" / "yoda.yaml"
+CORE_SKILL = ROOT_DIR / "src" / "skills" / "orchestrator-core" / "SKILL.md"
+SAM_PACK = ROOT_DIR / "src" / "assets" / "personalities" / "sam-harris.yaml"
+JESSE_PACK = ROOT_DIR / "src" / "assets" / "personalities" / "jesse-pinkman.yaml"
+ARCH_REVIEW_CORE = ROOT_DIR / "src" / "skills" / "architecture-review-core" / "SKILL.md"
+BJARNE_PACK = ROOT_DIR / "src" / "assets" / "personalities" / "bjarne-stroustrup.yaml"
+YODA_PACK = ROOT_DIR / "src" / "assets" / "personalities" / "yoda.yaml"
 
 
 def read_text(path: Path) -> str:
@@ -126,8 +126,6 @@ def parse_simple_yaml(path: Path) -> dict[str, object]:
         "speech_patterns",
         "default_structures",
         "interaction_rules",
-        "guardrails",
-        "anti_patterns",
     ):
         data[key] = parse_yaml_list(lines, key)
 
@@ -190,21 +188,9 @@ def build_instruction_packet(core_text: str, pack: dict[str, object] | None) -> 
         "Interaction rules:",
         *[f"- {item}" for item in pack["interaction_rules"]],
         "",
-        "Anti-patterns:",
-        *[f"- {item}" for item in pack["anti_patterns"]],
-        "",
         "Overlay prompt:",
         str(pack["prompt_overlay"]),
     ]
-
-    guardrails = pack.get("guardrails", [])
-    if guardrails:
-        insert_at = sections.index("Anti-patterns:")
-        sections[insert_at:insert_at] = [
-            "Guardrails:",
-            *[f"- {item}" for item in guardrails],
-            "",
-        ]
 
     ed = pack.get("expressive_depth", {})
     if isinstance(ed, dict) and ed:

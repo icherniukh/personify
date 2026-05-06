@@ -1,21 +1,36 @@
 # Personality Pack Contract
 
-This document defines the repo’s contract for interchangeable personality packs in Codex-oriented plugin packaging.
+This document defines the contract for interchangeable persona assets.
 
 ## Core Idea
 
-A personality pack is a bounded cognitive lens.
+A personality pack is a bounded cognitive lens stored as data.
 
 It is not:
 
 - a full workflow
 - a standalone orchestrator
 - a replacement for domain logic
+- a static installed skill
 - a pure style skin with no functional value
 
-Its job is to change how the same underlying workflow frames, structures, compresses, and communicates work.
+Its job is to change how the same underlying workflow frames, structures,
+compresses, and communicates work.
 
-The pack itself should stay domain-neutral unless a domain-specific persona is explicitly the point. Workflow-specific instructions belong in the workflow or variant skill, not in the reusable pack.
+The pack itself should stay domain-neutral unless a domain-specific persona is
+explicitly the point. Workflow-specific instructions belong in workflow cores or
+task-specific instructions, not in reusable persona assets.
+
+## Asset Promise
+
+Packs are user-extensible assets.
+
+The framework should be able to discover, validate, list, package, and compose
+any valid pack without adding a new wrapper skill or editing framework code for
+that specific persona.
+
+Bundled packs are examples and regression fixtures. User-created packs are
+first-class once they satisfy this contract.
 
 ## Invariant Layer
 
@@ -27,11 +42,11 @@ These things should stay stable across personalities:
 - operational competence
 - tool discipline
 
-The base workflow owns those guarantees.
+The base workflow and host assistant own those guarantees.
 
 ## Personality-Variable Layer
 
-These things are allowed to vary by personality:
+These things may vary by personality:
 
 - voice and rhetorical temperature
 - framing priorities
@@ -40,34 +55,57 @@ These things are allowed to vary by personality:
 - compression style
 - default answer structures
 - conversational stance toward ambiguity
+- humor, metaphor, and emotional register
 
 This is where personality should add value.
 
 ## Composition Model
 
-Composition uses three layers:
+Composition uses two required layers:
 
 1. **Base workflow**
-   A neutral skill that defines how the work gets done.
+   Neutral instructions that define how the work gets done.
 2. **Personality pack**
-   A standalone file that defines the lens applied to that workflow.
-3. **Variant skill**
-   A skill that declares: base workflow + chosen personality pack. In the current implementation, this may be represented as a thin wrapper.
+   A standalone asset that defines the lens applied to that workflow.
 
-An optional fourth layer is allowed:
+Entrypoint skills such as `persona-start`, `persona-apply`, and `persona-list`
+provide the user interface for discovery and composition.
 
-4. **Session-start skill**
-   A skill that declares that a workflow, variant, or workflow-plus-pack pairing should become the default operating mode for the rest of the session unless the user overrides it.
+Dedicated per-persona wrapper skills are not required by the model. They should
+be treated as compatibility shims or historical examples unless a host runtime
+forces that shape.
 
-If a personality conflicts with correctness, safety, or task completion, the base workflow wins.
+## No Pack-Level Guardrails
+
+Do not add `guardrails`, `anti_patterns`, or other local restriction sections to
+persona packs.
+
+That is intentional. Pack-level guardrails made personas less creative and less
+alive. The host model and platform policies already provide the needed
+behavioral boundaries; the things previously restricted here were not appearing
+in practice. Persona assets should focus on positive expressive material:
+voice, stance, reasoning habits, references, cadence, and interaction patterns.
+
+Quality control should happen through evaluation of outputs, not by stuffing the
+pack with prohibitions.
 
 ## File Location
 
-Within a plugin, store personality packs under:
+Within the plugin source, store bundled personality packs under:
 
 ```text
-assets/personalities/<id>.yaml
+src/assets/personalities/<id>.yaml
 ```
+
+Generated packages may copy those packs into runtime-specific reference
+directories, such as:
+
+```text
+references/personality-packs/<id>.yaml
+```
+
+Future user extension may add additional asset roots. Those roots should use the
+same contract.
 
 ## Required Fields
 
@@ -106,14 +144,9 @@ tradeoff_policy: |
 compression_policy: |
   Compress by preserving the decisive distinctions, not by flattening them.
 interaction_rules:
-  - do not pad
-  - prefer careful decomposition over slogans
-guardrails:
-  - usefulness over imitation
-  - correctness overrides persona flavor
-anti_patterns:
-  - smugness
-  - faux profundity
+  - prefer careful decomposition
+  - expose the reasoning structure before recommendations
+  - use compact analytic phrasing when the task benefits from it
 prompt_overlay: |
   Short reusable overlay text applied after the base workflow.
 provenance:
@@ -124,52 +157,66 @@ quality_level: draft
 
 ## Field Semantics
 
-- `id`: Stable machine-readable identifier.
+- `id`: Stable machine-readable identifier. It should match the filename stem.
 - `display_name`: User-facing label.
 - `summary`: One-line explanation of the pack.
 - `voice`: Surface communication qualities.
-- `interaction_stance`: The interpersonal stance the pack should take toward the user and the problem.
-- `value_profile`: The positive reasoning and presentation value this personality should add.
+- `interaction_stance`: The interpersonal stance the pack should take.
+- `value_profile`: The positive reasoning and presentation value this lens adds.
 - `reasoning_style`: Cognitive habits the pack should bias toward.
-- `preferred_terminology`: Terms, metaphors, and vocabulary the pack should preferentially use when they fit naturally.
-- `speech_patterns`: Signature syntax, cadence, and sentence-shape cues that make the surface voice recognizably belong to this personality.
-- `default_structures`: Answer shapes the pack should prefer when they fit the task.
-- `ambiguity_policy`: How the pack should behave when evidence is incomplete or mixed.
-- `tradeoff_policy`: How the pack should expose tradeoffs and competing considerations.
-- `compression_policy`: What should survive summarization and what should be stripped away.
-- `interaction_rules`: Concrete response behavior rules.
-- `guardrails`: Limits that keep the pack useful.
-- `anti_patterns`: Failure modes to avoid.
-- `prompt_overlay`: Composable prompt text, written to layer on top of a base workflow.
+- `preferred_terminology`: Terms, metaphors, and vocabulary to use when natural.
+- `speech_patterns`: Signature syntax, cadence, and sentence-shape cues.
+- `default_structures`: Answer shapes the pack should prefer when they fit.
+- `ambiguity_policy`: How the pack behaves when evidence is incomplete or mixed.
+- `tradeoff_policy`: How the pack exposes competing considerations.
+- `compression_policy`: What should survive summarization.
+- `interaction_rules`: Positive response behavior rules and characteristic moves.
+- `prompt_overlay`: Composable prompt text layered after the base workflow.
 - `provenance`: Where the pack came from and how trustworthy it is.
 - `quality_level`: Draft, reviewed, or research-backed maturity marker.
 
+## Validation Rules
+
+Validators should operate over every discovered pack, not over a hardcoded list
+of built-in personas.
+
+Minimum validation should check:
+
+- required fields exist
+- required list sections are non-empty
+- required block sections are non-empty
+- `id` is unique within the active asset set
+- `id` matches the filename stem
+- `quality_level` uses an allowed maturity marker
+- YAML parses cleanly
+- generated package copies match source packs
+
 ## Design Rule
 
-The pack should add positive value, not just constraints.
+The pack should add positive value, not constraints.
 
-Good personality packs do not merely say:
-
-- do not be theatrical
-- do not break usefulness
-- do not overdo the persona
-
-They also say:
+Good personality packs say:
 
 - what kinds of distinctions this personality surfaces
 - what kinds of structure it prefers
 - what kinds of syntax and cadence make it sound unmistakably like itself
 - what becomes clearer when this lens is applied
+- what it reaches for under pressure
+- how it varies emphasis, rhythm, and references
 
 When tuning a distinctive voice, prefer this direction:
 
 - make the personality clearly recognizable first
 - then trim only the parts that reduce clarity, correctness, or task usefulness
 
-Do not start from fear of overexpression and flatten the pack into generic competence.
+Do not start from fear of overexpression. Do not encode creativity-killing
+restrictions in the pack just because a failure is imaginable.
 
 ## Runtime Assumption
 
 This contract is a repo-level convention first.
 
-Current Codex support in this repo should treat personality composition as explicit packaging and prompt construction, not as a hidden runtime feature. Variant skills should point at the pack they compose with, rather than embedding the whole persona inline.
+Current Codex support in this repo should treat personality composition as
+explicit packaging and prompt construction, not as a hidden runtime feature.
+Entrypoint skills should point at discovered packs and compose them with the
+requested workflow or task.

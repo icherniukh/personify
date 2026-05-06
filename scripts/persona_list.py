@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-PERSONALITIES_DIR = ROOT_DIR / "assets" / "personalities"
+PERSONALITIES_DIR = ROOT_DIR / "src" / "assets" / "personalities"
 
 
 def parse_pack_header(path: Path) -> dict[str, str]:
