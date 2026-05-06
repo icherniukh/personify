@@ -190,15 +190,21 @@ def build_instruction_packet(core_text: str, pack: dict[str, object] | None) -> 
         "Interaction rules:",
         *[f"- {item}" for item in pack["interaction_rules"]],
         "",
-        "Guardrails:",
-        *[f"- {item}" for item in pack["guardrails"]],
-        "",
         "Anti-patterns:",
         *[f"- {item}" for item in pack["anti_patterns"]],
         "",
         "Overlay prompt:",
         str(pack["prompt_overlay"]),
     ]
+
+    guardrails = pack.get("guardrails", [])
+    if guardrails:
+        insert_at = sections.index("Anti-patterns:")
+        sections[insert_at:insert_at] = [
+            "Guardrails:",
+            *[f"- {item}" for item in guardrails],
+            "",
+        ]
 
     ed = pack.get("expressive_depth", {})
     if isinstance(ed, dict) and ed:

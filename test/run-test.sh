@@ -90,7 +90,6 @@ require_pattern "ambiguity_policy: \\|$" "$JESSE_PACK"
 require_pattern "tradeoff_policy: \\|$" "$JESSE_PACK"
 require_pattern "compression_policy: \\|$" "$JESSE_PACK"
 require_pattern "interaction_rules:$" "$JESSE_PACK"
-require_pattern "guardrails:$" "$JESSE_PACK"
 require_pattern "anti_patterns:$" "$JESSE_PACK"
 require_pattern "prompt_overlay: \\|$" "$JESSE_PACK"
 require_pattern "provenance:$" "$JESSE_PACK"
@@ -168,13 +167,16 @@ python3 "$ROOT_DIR/scripts/export_claude_skills.py" --check
 echo "10. Claude plugin export sync check"
 python3 "$ROOT_DIR/scripts/export_claude_plugin.py" --check
 
-echo "11. Claude plugin package validation"
+echo "11. Gemini extension export sync check"
+python3 "$ROOT_DIR/scripts/export_gemini_extension.py" --check
+
+echo "12. Claude plugin package validation"
 python3 "$ROOT_DIR/test/claude_plugin_test.py"
 
-echo "12. live model runner dry run"
+echo "13. live model runner dry run"
 python3 "$ROOT_DIR/test/live_model_test.py" --dry-run
 
-echo "13. architecture live runner dry run"
+echo "14. architecture live runner dry run"
 python3 "$ROOT_DIR/test/architecture_live_test.py" --dry-run
 
 echo "=== smoke test passed ==="
