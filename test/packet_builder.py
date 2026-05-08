@@ -6,12 +6,11 @@ from pathlib import Path
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-CORE_SKILL = ROOT_DIR / "src" / "skills" / "orchestrator-core" / "SKILL.md"
 SAM_PACK = ROOT_DIR / "src" / "assets" / "personalities" / "sam-harris.yaml"
 JESSE_PACK = ROOT_DIR / "src" / "assets" / "personalities" / "jesse-pinkman.yaml"
-ARCH_REVIEW_CORE = ROOT_DIR / "src" / "skills" / "architecture-review-core" / "SKILL.md"
 BJARNE_PACK = ROOT_DIR / "src" / "assets" / "personalities" / "bjarne-stroustrup.yaml"
 YODA_PACK = ROOT_DIR / "src" / "assets" / "personalities" / "yoda.yaml"
+NEUTRAL_TASK = """You are a neutral assistant. Complete the user's task correctly, clearly, and without applying a specific persona overlay."""
 
 
 def read_text(path: Path) -> str:
@@ -214,30 +213,30 @@ def build_instruction_packet(core_text: str, pack: dict[str, object] | None) -> 
 
 
 def load_neutral_packet() -> str:
-    return build_instruction_packet(read_text(CORE_SKILL), None)
+    return build_instruction_packet(NEUTRAL_TASK, None)
 
 
 def load_sam_packet() -> str:
-    return load_packet(CORE_SKILL, SAM_PACK)
+    return load_packet(SAM_PACK)
 
 
 def load_jesse_packet() -> str:
-    return load_packet(CORE_SKILL, JESSE_PACK)
+    return load_packet(JESSE_PACK)
 
 
-def load_packet(core_path: Path, pack_path: Path | None = None) -> str:
+def load_packet(pack_path: Path | None = None, task: str = NEUTRAL_TASK) -> str:
     if pack_path is None:
-        return build_instruction_packet(read_text(core_path), None)
-    return build_instruction_packet(read_text(core_path), parse_simple_yaml(pack_path))
+        return build_instruction_packet(task, None)
+    return build_instruction_packet(task, parse_simple_yaml(pack_path))
 
 
 def load_architecture_neutral_packet() -> str:
-    return load_packet(ARCH_REVIEW_CORE)
+    return load_packet(task="Review the architecture clearly and concretely.")
 
 
 def load_bjarne_architecture_packet() -> str:
-    return load_packet(ARCH_REVIEW_CORE, BJARNE_PACK)
+    return load_packet(BJARNE_PACK, task="Review the architecture clearly and concretely.")
 
 
 def load_yoda_architecture_packet() -> str:
-    return load_packet(ARCH_REVIEW_CORE, YODA_PACK)
+    return load_packet(YODA_PACK, task="Review the architecture clearly and concretely.")

@@ -1,6 +1,6 @@
 # Persona Evaluation
 
-This document defines how `promptonality` should decide whether a persona asset
+This document defines how `personify` should decide whether a persona asset
 is good, useful, non-repetitive, and faithful to its intended source.
 
 ## Core Question
@@ -162,12 +162,12 @@ Run on every pack:
 
 ### Packet Checks
 
-Build composed instruction packets for selected workflow-pack pairs and verify:
+Build composed instruction packets for selected task/persona pairs and verify:
 
-- workflow guarantees remain present
+- task instructions remain present
 - persona overlay is present
 - pack-level guardrails and anti-patterns are absent
-- no workflow-specific language leaks into general packs unless intended
+- no task-specific language leaks into general packs unless intended
 
 ### Model-Based Evaluation
 

@@ -100,7 +100,7 @@ def has_block_content(lines: list[str], key: str) -> bool:
 
 
 def main() -> None:
-    print("=== promptonality personality pack contract test ===")
+    print("=== personify personality pack contract test ===")
     paths = sorted(PERSONALITIES_DIR.glob("*.yaml"))
     assert paths, f"no packs found in {PERSONALITIES_DIR}"
 

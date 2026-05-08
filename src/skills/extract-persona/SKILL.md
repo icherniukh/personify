@@ -1,11 +1,11 @@
 ---
-name: persona-extract-online
-description: Research-backed extraction skill for turning a person or character into a normalized promptonality personality pack.
+name: extract-persona
+description: Create a research-backed Personify persona pack from web-grounded source material.
 ---
 
-# Persona Extract Online
+# Research Persona
 
-Like `persona-extract`, but grounds every claim in researched source material before generating a normalized `promptonality` personality pack. Use when fidelity and accuracy matter more than speed, or when the subject is obscure enough that training data alone is unreliable.
+Grounds every claim in researched source material before generating a normalized Personify persona pack. Use when fidelity and accuracy matter more than speed, or when the subject is obscure enough that training data alone is unreliable.
 
 ## Inputs Required
 
@@ -14,7 +14,7 @@ Ask the user for any missing inputs before proceeding:
 - **Person/Character**: [NAME] — public figure, historical person, or fictional character
 - **Role/Use-case**: [e.g. "rigorous senior code reviewer", "creative brainstorming partner"]
 - **Extra emphasis** *(optional)*: specific traits to highlight
-- **Base workflow** *(optional but recommended)*: the neutral skill or job this personality will be applied to
+- **Use-case** *(optional but recommended)*: the kind of work this persona should be useful for
 
 ## Phase 1: Research
 
@@ -93,7 +93,7 @@ How researched traits translate into this specific role. Where their actual docu
 
 ### Step 7: Personality Pack YAML
 
-Generate the full `promptonality` pack YAML grounded in research. Requirements:
+Generate the full Personify pack YAML grounded in research. Requirements:
 
 - Include explicit fields for:
   - `id` — kebab-case machine identifier
@@ -128,7 +128,7 @@ Write the YAML to:
 src/assets/personalities/<id>.yaml
 ```
 
-relative to the source root (e.g. `plugins/promptonality/src/assets/personalities/hikaru-nakamura.yaml`). Do not only output it to conversation — the file is the deliverable. Confirm the path after writing.
+relative to the source root (e.g. `src/assets/personalities/hikaru-nakamura.yaml`). Do not only output it to conversation — the file is the deliverable. Confirm the path after writing.
 
 ## Quality Rules
 

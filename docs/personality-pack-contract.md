@@ -8,18 +8,18 @@ A personality pack is a bounded cognitive lens stored as data.
 
 It is not:
 
-- a full workflow
-- a standalone orchestrator
+- a full task runner
+- a planner or executor
 - a replacement for domain logic
 - a static installed skill
 - a pure style skin with no functional value
 
-Its job is to change how the same underlying workflow frames, structures,
-compresses, and communicates work.
+Its job is to change how the assistant frames, structures, compresses, and
+communicates the same task.
 
 The pack itself should stay domain-neutral unless a domain-specific persona is
-explicitly the point. Workflow-specific instructions belong in workflow cores or
-task-specific instructions, not in reusable persona assets.
+explicitly the point. Domain instructions belong in task-specific instructions,
+not in reusable persona assets.
 
 ## Asset Promise
 
@@ -42,7 +42,7 @@ These things should stay stable across personalities:
 - operational competence
 - tool discipline
 
-The base workflow and host assistant own those guarantees.
+The host assistant and task instructions own those guarantees.
 
 ## Personality-Variable Layer
 
@@ -63,12 +63,13 @@ This is where personality should add value.
 
 Composition uses two required layers:
 
-1. **Base workflow**
-   Neutral instructions that define how the work gets done.
+1. **Task instructions**
+   The user's task, plus any host or project instructions that define how the
+   work gets done.
 2. **Personality pack**
-   A standalone asset that defines the lens applied to that workflow.
+   A standalone asset that defines the lens applied to that task.
 
-Entrypoint skills such as `persona-start`, `persona-apply`, and `persona-list`
+Entrypoint skills such as `use-persona`, `as-persona`, and `list-personas`
 provide the user interface for discovery and composition.
 
 Dedicated per-persona wrapper skills are not required by the model. They should
@@ -148,7 +149,7 @@ interaction_rules:
   - expose the reasoning structure before recommendations
   - use compact analytic phrasing when the task benefits from it
 prompt_overlay: |
-  Short reusable overlay text applied after the base workflow.
+  Short reusable overlay text applied after task instructions.
 provenance:
   source_type: curated
   notes: First-pass local pack
@@ -171,7 +172,7 @@ quality_level: draft
 - `tradeoff_policy`: How the pack exposes competing considerations.
 - `compression_policy`: What should survive summarization.
 - `interaction_rules`: Positive response behavior rules and characteristic moves.
-- `prompt_overlay`: Composable prompt text layered after the base workflow.
+- `prompt_overlay`: Composable prompt text layered after task instructions.
 - `provenance`: Where the pack came from and how trustworthy it is.
 - `quality_level`: Draft, reviewed, or research-backed maturity marker.
 
@@ -218,5 +219,5 @@ This contract is a repo-level convention first.
 
 Current Codex support in this repo should treat personality composition as
 explicit packaging and prompt construction, not as a hidden runtime feature.
-Entrypoint skills should point at discovered packs and compose them with the
-requested workflow or task.
+Entrypoint skills should point at discovered packs and apply them to the
+requested task or session.

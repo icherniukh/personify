@@ -25,7 +25,7 @@ def load_cases() -> list[dict[str, object]]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Run live model tests for promptonality personality behavior."
+        description="Run live model tests for personify personality behavior."
     )
     parser.add_argument(
         "--case",
@@ -116,7 +116,7 @@ def build_judge_prompt(
 ) -> str:
     return textwrap.dedent(
         f"""
-        Evaluate two assistant responses for the same task. One is a neutral base workflow.
+        Evaluate two assistant responses for the same task. One is a neutral baseline.
         The other uses a Sam Harris personality overlay. Judge the outputs on task success and
         whether the overlay creates a meaningful but non-theatrical difference.
 
@@ -273,7 +273,7 @@ def main() -> int:
     api_key = os.environ.get("OPENAI_API_KEY")
     api_url = os.environ.get("OPENAI_RESPONSES_URL", DEFAULT_API_URL)
 
-    print("=== promptonality live model test ===")
+    print("=== personify live model test ===")
     print(f"cases: {', '.join(str(case['id']) for case in cases)}")
     print(f"repeats: {args.repeats}")
 

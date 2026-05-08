@@ -1,23 +1,22 @@
 ---
-name: persona-start
-description: Session bootstrap for promptonality. Activates a selected workflow, persona asset, or workflow-plus-pack pairing as the default operating mode for the rest of the session unless the user overrides it.
+name: use-persona
+description: Session bootstrap for personify. Activates a selected persona asset as the default voice and reasoning lens for the rest of the session unless the user overrides it.
 ---
 
-# Persona Start
+# Use Persona
 
-This is the session bootstrap layer for `promptonality`.
+This is the session bootstrap layer for `personify`.
 
-Use it when the user wants a workflow or personality-flavored mode to govern the whole session rather than a single reply.
+Use it when the user wants a persona-flavored mode to govern the whole session rather than a single reply.
 
 ## Core Rule
 
-When invoked, treat the selected workflow, persona asset, or workflow-plus-pack pairing as the default policy for all nontrivial work in the session unless the user explicitly overrides it.
+When invoked, treat the selected persona asset as the default voice, stance, and reasoning lens for all nontrivial work in the session unless the user explicitly overrides it.
 
 ## Activation State
 
 After activation, keep a compact active-mode state in mind for the rest of the session:
 
-- active workflow or neutral mode
 - active persona id and loaded pack path, when a persona is selected
 - persona strength, defaulting to `strong`
 - three to five voice markers from the loaded pack that should keep appearing
@@ -87,14 +86,12 @@ Reload the pack if needed, restate the active mode in one short persona-shaped s
 
 Resolve the requested session mode in this order:
 
-1. Existing installed skill:
-   If the user names a relevant installed skill, activate that skill directly.
-2. Workflow plus discovered persona pack:
-   If the user names a workflow and a discovered persona pack, compose them explicitly.
-3. Workflow only:
-   If the user names only a neutral workflow, activate that workflow with no personality overlay.
-
-This explicit composition can be used even when there is no prebuilt named skill for that exact combination.
+1. Persona asset:
+   If the user names a discovered persona pack, activate it.
+2. Persona plus task style:
+   If the user names a task type, let the persona shape how that task is approached without pretending Personify owns task execution.
+3. Unclear persona:
+   If the requested persona is missing or ambiguous, list close matches and ask for the exact pack.
 
 ## Mandatory Pack Load
 
@@ -119,18 +116,18 @@ If you did not read the selected pack file, do not act like the persona is fully
 
 Examples:
 
-- `Use orchestrator-core with the Sam Harris pack for this session.`
-- `For this session, use Yoda for architecture review.`
-- `Default to architecture-review-core with the Bjarne Stroustrup pack.`
+- `Use the Sam Harris pack for this session.`
+- `For this session, use Yoda.`
+- `Use Hikaru Nakamura as the default persona.`
 
 ## Bootstrap Workflow
 
 1. Identify the requested mode:
-   Which workflow, persona asset, or workflow-plus-pack pairing should become the session default.
+   Which persona asset should become the session default.
 2. Confirm scope:
    Session-wide by default unless the user limits the scope.
 3. Activate the mode:
-   Apply the referenced workflow rules first, then any personality overlay.
+   Apply the task instructions first, then the selected persona overlay.
 4. State the operating summary:
    Give one compact sentence describing how the session will be handled, ideally in the activated persona's voice.
 5. Carry the mode forward:
@@ -154,10 +151,9 @@ Keep the activated mode in effect until:
 
 This is still explicit prompt construction, not a hidden runtime compiler.
 
-So yes, the user can say "use this workflow with this persona" without a prebuilt combo, as long as:
+So yes, the user can say "use this persona for this kind of work" without a prebuilt combo, as long as:
 
-- the workflow is identifiable
 - the persona pack exists in a discovered asset root
-- the pairing is compatible
+- the persona does not conflict with the task
 
 But that does not automatically create a new installed skill. It activates the combination for the current session by instruction.

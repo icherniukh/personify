@@ -9,11 +9,21 @@ from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 PLUGIN_JSON = ROOT_DIR / "codex" / ".codex-plugin" / "plugin.json"
+ROOT_CLAUDE_MARKETPLACE = ROOT_DIR / ".claude-plugin" / "marketplace.json"
+PACKAGE_META = ROOT_DIR / "src" / "package.json"
+LICENSE = ROOT_DIR / "LICENSE"
+EXPECTED_COMMANDS = (
+    "as-persona",
+    "extract-persona",
+    "list-personas",
+    "use-persona",
+)
 
 
 def main() -> None:
-    print("=== promptonality package test ===")
+    print("=== personify package test ===")
     payload = json.loads(PLUGIN_JSON.read_text(encoding="utf-8"))
+    meta = json.loads(PACKAGE_META.read_text(encoding="utf-8"))
 
     print("1. manifest identity")
     assert ROOT_DIR.name == payload["name"]
@@ -63,9 +73,29 @@ def main() -> None:
     print("4. skill package layout")
     skills_dir = ROOT_DIR / "codex" / "skills"
     skill_dirs = [path for path in skills_dir.iterdir() if path.is_dir()]
-    assert skill_dirs, "no skills found"
+    assert sorted(path.name for path in skill_dirs) == sorted(EXPECTED_COMMANDS)
     for skill_dir in skill_dirs:
         assert (skill_dir / "SKILL.md").is_file(), f"missing SKILL.md in {skill_dir.name}"
+    print("ok")
+
+    print("5. command adapters")
+    for command_name in EXPECTED_COMMANDS:
+        assert (ROOT_DIR / "codex" / "commands" / f"{command_name}.md").is_file()
+        assert (ROOT_DIR / "gemini" / "commands" / f"{command_name}.toml").is_file()
+    print("ok")
+
+    print("6. release metadata")
+    assert LICENSE.is_file(), "missing LICENSE file"
+    assert "MIT License" in LICENSE.read_text(encoding="utf-8")
+    marketplace = json.loads(ROOT_CLAUDE_MARKETPLACE.read_text(encoding="utf-8"))
+    assert marketplace["name"] == meta["name"]
+    assert marketplace["owner"]["name"] == meta["author"]["name"]
+    assert marketplace["plugins"][0]["name"] == meta["name"]
+    assert marketplace["plugins"][0]["source"] == "./claude"
+    readme = (ROOT_DIR / "README.md").read_text(encoding="utf-8")
+    repo_slug = meta["repository"].removeprefix("https://github.com/")
+    assert f"claude plugin marketplace add {repo_slug}" in readme
+    assert f"codex plugin marketplace add {repo_slug}" in readme
     print("ok")
 
     print("=== package test passed ===")

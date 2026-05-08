@@ -78,7 +78,7 @@
     ],
     "tags": {
       "v0.1.0": "initial Codex-ready skill packaging baseline",
-      "v0.2.0": "promptonality plugin: style+decision tests, Jesse polar expressions, Yoda test"
+      "v0.2.0": "personify plugin: style+decision tests, Jesse polar expressions, Yoda test"
     }
   }
 }

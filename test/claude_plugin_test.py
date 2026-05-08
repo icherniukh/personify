@@ -11,22 +11,19 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 CLAUDE_PLUGIN_DIR = ROOT_DIR / "claude"
 PLUGIN_JSON = CLAUDE_PLUGIN_DIR / ".claude-plugin" / "plugin.json"
 EXPECTED_SKILLS = (
-    "architecture-review-core",
-    "orchestrator-core",
-    "persona-start",
-    "persona-apply",
-    "persona-list",
-    "persona-extract",
-    "persona-extract-online",
+    "use-persona",
+    "as-persona",
+    "list-personas",
+    "extract-persona",
 )
 
 
 def main() -> None:
-    print("=== promptonality Claude plugin test ===")
+    print("=== personify Claude plugin test ===")
     payload = json.loads(PLUGIN_JSON.read_text(encoding="utf-8"))
 
     print("1. manifest identity")
-    assert payload["name"] == "promptonality"
+    assert payload["name"] == "personify"
     assert re.fullmatch(r"\d+\.\d+\.\d+", payload["version"])
     assert isinstance(payload["description"], str) and payload["description"]
     print("ok")

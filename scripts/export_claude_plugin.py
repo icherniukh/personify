@@ -9,7 +9,7 @@ from package import check_target, build_target
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Compatibility wrapper for the promptonality Claude package build.")
+    parser = argparse.ArgumentParser(description="Compatibility wrapper for the personify Claude package build.")
     parser.add_argument("--check", action="store_true", help="Verify the generated Claude package is in sync.")
     args = parser.parse_args()
     if args.check:

@@ -15,7 +15,7 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 SRC_DIR = ROOT_DIR / "src"
 SKILLS_SRC = SRC_DIR / "skills"
 PERSONALITIES_SRC = SRC_DIR / "assets" / "personalities"
-CONTRACT_DOC = ROOT_DIR.parents[1] / "docs" / "personality-pack-contract.md"
+CONTRACT_DOC = ROOT_DIR / "docs" / "personality-pack-contract.md"
 PACKAGE_META = SRC_DIR / "package.json"
 
 TARGET_DIRS = {
@@ -24,8 +24,30 @@ TARGET_DIRS = {
     "gemini": ROOT_DIR / "gemini",
 }
 
-PERSONA_ENTRYPOINTS = {"persona-start", "persona-apply", "persona-list"}
-CONTRACT_SKILLS = {"persona-list", "persona-extract", "persona-extract-online"}
+PERSONA_ENTRYPOINTS = {"use-persona", "as-persona", "list-personas"}
+CONTRACT_SKILLS = {"list-personas", "extract-persona"}
+COMMANDS = {
+    "list-personas": {
+        "argument_hint": "[filter-or-focus]",
+        "description": "List available Personify persona packs.",
+        "prompt": "Use the list-personas skill to list available Personify persona packs. User arguments: $ARGUMENTS",
+    },
+    "use-persona": {
+        "argument_hint": "<persona> [session goal]",
+        "description": "Use a Personify persona as the default voice and reasoning lens for the session.",
+        "prompt": "Use the use-persona skill to activate this persona for the session. User arguments: $ARGUMENTS",
+    },
+    "as-persona": {
+        "argument_hint": "<persona> <task>",
+        "description": "Apply a Personify persona to the current task or thread.",
+        "prompt": "Use the as-persona skill to apply this persona overlay for the requested scope. User arguments: $ARGUMENTS",
+    },
+    "extract-persona": {
+        "argument_hint": "<person-or-character> [role/use-case]",
+        "description": "Create a research-backed Personify persona pack from web-grounded source material.",
+        "prompt": "Use the extract-persona skill to create a research-backed Personify persona pack. User arguments: $ARGUMENTS",
+    },
+}
 
 
 def read_meta() -> dict[str, object]:
@@ -60,7 +82,7 @@ def skill_names() -> list[str]:
 def bundled_personality_note() -> str:
     return (
         "\n\n## Persona Assets\n\n"
-        "This packaged skill bundles the current promptonality starter packs under:\n\n"
+        "This packaged skill bundles the current Personify starter packs under:\n\n"
         "- `references/personality-packs/`\n\n"
         "Those files are persona assets. Bundled packs are starter assets and regression fixtures, not the boundary of the framework.\n"
     )
@@ -112,7 +134,7 @@ def package_skills(target: Path) -> None:
         copy_tree(src, dst)
 
         if name in PERSONA_ENTRYPOINTS:
-            if name in {"persona-start", "persona-apply"}:
+            if name in {"use-persona", "as-persona"}:
                 skill_md = dst / "SKILL.md"
                 skill_md.write_text(skill_md.read_text(encoding="utf-8") + bundled_personality_note(), encoding="utf-8")
             pack_dir = dst / "references" / "personality-packs"
@@ -124,10 +146,41 @@ def package_skills(target: Path) -> None:
             (dst / "references").mkdir(parents=True, exist_ok=True)
             shutil.copyfile(CONTRACT_DOC, dst / "references" / "personality-pack-contract.md")
 
-        if name == "persona-list":
+        if name == "list-personas":
             script = dst / "scripts" / "persona_list.py"
             write_text(script, persona_list_script())
             script.chmod(0o755)
+
+
+def codex_command(name: str, spec: dict[str, str]) -> str:
+    return f"""---
+description: {spec["description"]}
+argument-hint: {spec["argument_hint"]}
+---
+
+{spec["prompt"]}
+"""
+
+
+def gemini_command(spec: dict[str, str]) -> str:
+    prompt = spec["prompt"].replace("$ARGUMENTS", "{{args}}")
+    return f"""description = {json.dumps(spec["description"])}
+prompt = {json.dumps(prompt)}
+"""
+
+
+def package_codex_commands(target: Path) -> None:
+    commands_dir = target / "commands"
+    commands_dir.mkdir(parents=True, exist_ok=True)
+    for name, spec in sorted(COMMANDS.items()):
+        write_text(commands_dir / f"{name}.md", codex_command(name, spec))
+
+
+def package_gemini_commands(target: Path) -> None:
+    commands_dir = target / "commands"
+    commands_dir.mkdir(parents=True, exist_ok=True)
+    for name, spec in sorted(COMMANDS.items()):
+        write_text(commands_dir / f"{name}.toml", gemini_command(spec))
 
 
 def codex_manifest(meta: dict[str, object]) -> str:
@@ -150,7 +203,7 @@ def claude_plugin_manifest(meta: dict[str, object]) -> str:
     payload = {
         "name": meta["name"],
         "version": meta["version"],
-        "description": "Portable personality packs for Claude Code with promptonality persona and workflow skills.",
+        "description": "Portable persona packs for Claude Code with Personify persona skills.",
         "author": {"name": meta["author"]["name"]},
         "license": meta["license"],
         "homepage": meta["homepage"],
@@ -161,14 +214,15 @@ def claude_plugin_manifest(meta: dict[str, object]) -> str:
 def claude_marketplace(meta: dict[str, object]) -> str:
     payload = {
         "name": meta["name"],
+        "description": "Installable Claude Code plugin for portable persona packs.",
         "owner": {"name": meta["author"]["name"]},
         "plugins": [
             {
                 "name": meta["name"],
-                "description": "Portable personality packs for Claude Code with promptonality persona and workflow skills.",
-                "source": ".",
-                "category": "workflow",
-                "tags": ["persona", "personality", "workflow", "session"],
+                "description": "Portable persona packs for Claude Code with Personify persona skills.",
+                "source": "./",
+                "category": "productivity",
+                "tags": ["persona", "personality", "voice", "session"],
             }
         ],
     }
@@ -176,14 +230,14 @@ def claude_marketplace(meta: dict[str, object]) -> str:
 
 
 def claude_readme() -> str:
-    return """# Promptonality Claude Plugin
+    return """# Personify Claude Plugin
 
-Generated Claude Code plugin package for `promptonality`.
+Generated Claude Code plugin package for `personify`.
 
 This directory is build output. Regenerate it with:
 
 ```bash
-python3 plugins/promptonality/scripts/package.py build --target claude
+python3 scripts/package.py build --target claude
 ```
 """
 
@@ -193,24 +247,24 @@ def gemini_manifest(meta: dict[str, object]) -> str:
 
 
 def gemini_context() -> str:
-    return """# Promptonality Extension
+    return """# Personify Extension
 
-`promptonality` provides portable personality packs and neutral workflow cores.
+`personify` provides portable persona packs for agent voice and reasoning style.
 
-Use `persona-list` to see bundled packs. Use `persona-apply` or `persona-start`
-to compose a persona with a task, thread, session, or workflow.
+Use `list-personas` to see bundled packs. Use `as-persona` for one task or
+`use-persona` for a whole session.
 """
 
 
 def gemini_readme() -> str:
-    return """# Promptonality Gemini Extension
+    return """# Personify Gemini Extension
 
-Generated Gemini CLI extension package for `promptonality`.
+Generated Gemini CLI extension package for `personify`.
 
 This directory is build output. Regenerate it with:
 
 ```bash
-python3 plugins/promptonality/scripts/package.py build --target gemini
+python3 scripts/package.py build --target gemini
 ```
 """
 
@@ -223,6 +277,7 @@ def build_target(target_name: str) -> None:
 
     if target_name == "codex":
         write_text(target / ".codex-plugin" / "plugin.json", codex_manifest(meta))
+        package_codex_commands(target)
     elif target_name == "claude":
         write_text(target / ".claude-plugin" / "plugin.json", claude_plugin_manifest(meta))
         write_text(target / ".claude-plugin" / "marketplace.json", claude_marketplace(meta))
@@ -231,6 +286,7 @@ def build_target(target_name: str) -> None:
         write_text(target / "gemini-extension.json", gemini_manifest(meta))
         write_text(target / "GEMINI.md", gemini_context())
         write_text(target / "README.md", gemini_readme())
+        package_gemini_commands(target)
     else:
         raise ValueError(f"unknown target: {target_name}")
 
@@ -280,9 +336,9 @@ def doctor() -> bool:
     )
     for cache_root in cache_roots:
         if cache_root.exists():
-            stale_caches = sorted(path for path in cache_root.rglob("promptonality") if path.is_dir())
+            stale_caches = sorted(path for path in cache_root.rglob("personify") if path.is_dir())
             if stale_caches:
-                print(f"plugin cache drift risk: refresh or remove cached promptonality packages under {cache_root}", file=sys.stderr)
+                print(f"plugin cache drift risk: refresh or remove cached personify packages under {cache_root}", file=sys.stderr)
                 for path in stale_caches:
                     print(f"  {path}", file=sys.stderr)
                 ok = False
@@ -298,7 +354,7 @@ def selected_targets(value: str) -> list[str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Build and check promptonality platform packages.")
+    parser = argparse.ArgumentParser(description="Build and check Personify platform packages.")
     sub = parser.add_subparsers(dest="command", required=True)
 
     for command in ("build", "check"):

@@ -1,11 +1,11 @@
 ---
-name: persona-apply
-description: One-off composition skill for promptonality. Applies a discovered persona asset to a workflow or task for the current request or thread without making it the session default.
+name: as-persona
+description: One-off composition skill for personify. Applies a discovered persona asset to the current task or thread without making it the session default.
 ---
 
-# Persona Apply
+# Apply Persona
 
-Use this skill when the user wants to combine a workflow or task with a discovered persona asset for the current request or thread, but not necessarily for the whole session.
+Use this skill when the user wants to apply a discovered persona asset to the current request or thread, but not necessarily for the whole session.
 
 ## Scope Rule
 
@@ -17,7 +17,7 @@ Possible scopes:
 - this thread
 - this session
 
-If the user wants session-wide behavior, prefer `persona-start`.
+If the user wants session-wide behavior, prefer `use-persona`.
 
 ## Persona Strength Default
 
@@ -60,12 +60,12 @@ Funny, thematic, or highly flavored delivery is a feature here, not a bug, as lo
 
 Resolve the requested composition in this order:
 
-1. Existing installed skill:
-   If the requested combo already exists as a named installed skill, use that skill.
-2. Workflow plus discovered pack:
-   If the workflow and pack both exist, compose them explicitly for the requested scope.
-3. Task plus discovered pack:
+1. Persona plus task:
    If the user names only a pack and a task, apply the pack directly to the task while preserving correctness and usefulness.
+2. Persona only:
+   If the user names only a pack, apply it to the current request.
+3. Missing or ambiguous pack:
+   If the pack is missing or ambiguous, list close matches and ask for the exact persona.
 
 ## Mandatory Pack Load
 
@@ -90,7 +90,7 @@ If you did not read the selected pack file, do not act like the persona was full
 
 ## Operating Rule
 
-Apply the workflow first, then apply the personality overlay.
+Apply the task instructions first, then apply the personality overlay.
 
 Do not flatten the persona merely to sound neutral, restrained, or professionally safe.
 Only reduce the stylistic effect when the user asks for that explicitly.
@@ -101,11 +101,11 @@ This skill does not create a new installed skill.
 
 It performs ad-hoc composition for the requested scope using:
 
-- an existing installed skill, when one is available
-- or explicit prompt-level composition, when no dedicated wrapper exists yet
+- a loaded persona pack
+- the current task instructions
 
 ## Example Requests
 
-- `Use architecture-review-core with Yoda for this task.`
-- `Apply the Sam Harris pack to this planning workflow.`
+- `Use Yoda for this task.`
+- `Apply the Sam Harris pack to this planning task.`
 - `Use the Bjarne Stroustrup pack, but only for this thread.`
