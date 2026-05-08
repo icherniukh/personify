@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "personify",
+  "project_id": "29979ee5-e40e-4d41-a969-9fb77ec3c9d3"
+}
