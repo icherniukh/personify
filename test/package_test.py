@@ -76,6 +76,7 @@ def main() -> None:
     assert sorted(path.name for path in skill_dirs) == sorted(EXPECTED_COMMANDS)
     for skill_dir in skill_dirs:
         assert (skill_dir / "SKILL.md").is_file(), f"missing SKILL.md in {skill_dir.name}"
+        assert not (skill_dir / "references" / "personality-packs" / "jesse-pinkman-v1.yaml").exists()
     print("ok")
 
     print("5. command adapters")

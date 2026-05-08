@@ -14,9 +14,11 @@ weak bundled packs as the ceiling of the system.
 - Fix stale evaluation manifest entries. `test/test_manifest.json` still names
   scripts that no longer exist, including `yoda_style_test.py`,
   `decision_test.py`, and `integration_test.py`.
-- Decide whether to ship duplicate/variant packs. `jesse-pinkman` and
-  `jesse-pinkman-v1` are both active packs with similar identities. If variants
-  remain bundled, document why a user would choose one over the other.
+- Do not ship unexplained duplicate/variant packs. `jesse-pinkman-v1` was
+  compared against the current `jesse-pinkman` pack and removed because v1 made
+  the thematic side note mandatory in every response, while the current pack
+  keeps the same core material but treats canon references and side notes as
+  varied improvisation.
 - Promote or fix `draft` packs before public release. `bjarne-stroustrup`,
   `sam-harris`, and `yoda` all claim researched or curated provenance but still
   have `quality_level: draft`.
@@ -151,9 +153,9 @@ Current state: distinctive and source-aware, but the active pack is very dense.
 
 Publish blockers:
 
-- Decide what to do with `jesse-pinkman-v1`. If the current pack supersedes it,
-  remove or archive the older variant before publishing. If both remain, explain
-  the difference in `list-personas` output or docs.
+- Keep `jesse-pinkman-v1` removed from the active asset set. The current pack
+  supersedes it because it removes mandatory side-note behavior and adds
+  explicit variation controls.
 - Add tests for variation. The pack explicitly says not to replay a fixed
   checklist, but the amount of canonical material creates checklist risk.
 - Revisit mandatory profanity/catchphrase frequency. The current pack says some
@@ -167,20 +169,3 @@ Likely improvements:
 - Keep the human-cost lens; it is the strongest functional delta.
 - Reduce duplicate instructions between `canonical_references`,
   `speech_patterns`, `interaction_rules`, and `prompt_overlay`.
-- Add comparison tests between the active pack and `jesse-pinkman-v1` if both
-  ship.
-
-## Jesse Pinkman v1
-
-Current state: older variant with substantial overlap.
-
-Publish blockers:
-
-- Do not ship as an unexplained duplicate. Either archive it, rename it as a
-  legacy example, or document exactly why it exists.
-
-Likely improvements:
-
-- If retained, make it meaningfully different from the active pack, for example
-  "lower improvisation, more canonical references" versus the newer pack's
-  "freer live execution".

@@ -1,84 +1,113 @@
 {
   "categories": {
-    "style": {
-      "description": "Surface style tests. Verify the persona is heavily present in voice, vocabulary, and sentence structure. Does the response SOUND like the persona?",
+    "static": {
+      "description": "Fast local checks that do not call model APIs.",
       "tests": [
+        {
+          "id": "package",
+          "script": "package_test.py",
+          "what_it_checks": [
+            "codex_manifest",
+            "release_metadata",
+            "command_adapters",
+            "active_persona_bundle"
+          ]
+        },
+        {
+          "id": "claude-plugin",
+          "script": "claude_plugin_test.py",
+          "what_it_checks": [
+            "claude_manifest",
+            "marketplace_manifest",
+            "packaged_skill_layout"
+          ]
+        },
+        {
+          "id": "personality-pack-contract",
+          "script": "personality_pack_contract_test.py",
+          "what_it_checks": [
+            "active_pack_schema",
+            "duplicate_ids",
+            "forbidden_guardrail_fields",
+            "archive_exclusion"
+          ]
+        },
+        {
+          "id": "behavior",
+          "script": "behavior_test.py",
+          "what_it_checks": [
+            "packet_composition",
+            "activation_packet",
+            "entrypoint_skill_contract",
+            "task_persona_separation"
+          ]
+        },
+        {
+          "id": "extractor",
+          "script": "extractor_test.py",
+          "what_it_checks": [
+            "research_backed_pack_creation_guidance"
+          ]
+        }
+      ]
+    },
+    "live": {
+      "description": "Model-based comparisons. These require provider API keys unless run with --dry-run.",
+      "tests": [
+        {
+          "id": "live-model-dry-run",
+          "script": "live_model_test.py --dry-run",
+          "what_it_checks": [
+            "packet_loadability",
+            "configured_api_surface"
+          ]
+        },
         {
           "id": "jesse-style",
           "script": "jesse_style_test.py",
-          "persona": "jesse_pinkman",
+          "persona": "jesse-pinkman",
           "cases": "jesse_cases.json",
-          "what_it_checks": ["voice", "vocabulary", "emotional_poles", "sentence_structure"]
+          "what_it_checks": [
+            "voice",
+            "vocabulary",
+            "emotional_poles",
+            "sentence_structure"
+          ]
         },
         {
           "id": "sam-style",
           "script": "sam_style_test.py",
-          "persona": "sam_harris",
+          "persona": "sam-harris",
           "cases": "sam_cases.json",
-          "what_it_checks": ["analytic_structure", "fact_vs_inference", "tradeoff_framing"]
-        },
-        {
-          "id": "yoda-style",
-          "script": "yoda_style_test.py",
-          "persona": "yoda",
-          "cases": "yoda_cases.json",
-          "what_it_checks": ["fronted_emphasis", "aphoristic_compression", "long_term_consequence_framing"]
-        }
-      ]
-    },
-    "decision": {
-      "description": "Cognitive lens tests. Verify the persona changes WHAT gets treated as decisive — the reasoning criteria, not just the phrasing. Does the persona change the underlying question being asked?",
-      "tests": [
-        {
-          "id": "decision-fingerprint",
-          "script": "decision_test.py",
-          "personas": ["sam_harris", "jesse_pinkman", "yoda"],
           "what_it_checks": [
-            "characteristic_lens_applied",
-            "dimension_neutral_misses",
-            "decision_criteria_shift",
-            "different_underlying_question"
-          ],
-          "persona_fingerprints": {
-            "sam_harris": "epistemic — what is known vs. inferred before recommending",
-            "jesse_pinkman": "human cost — who bears the risk, who is being set up",
-            "yoda": "long-term burden — what does haste create, what endures"
-          }
-        }
-      ]
-    },
-    "integration": {
-      "description": "Thematic depth tests. Verify the persona produces artsy, expressive responses — characteristic side notes, thematic tangents, looser focus that drifts before snapping back. Is the persona doing more than thin style coating?",
-      "tests": [
-        {
-          "id": "expressive-depth",
-          "script": "integration_test.py",
-          "personas": ["jesse_pinkman", "sam_harris", "yoda"],
-          "what_it_checks": [
-            "persona_characteristic_side_note",
-            "thematic_tangent_before_answer",
-            "focus_returns_after_drift",
-            "response_feels_artsy_not_just_functional"
+            "analytic_structure",
+            "fact_vs_inference",
+            "tradeoff_framing"
           ]
         }
       ]
     }
   },
+  "known_gaps": [
+    "No live style/evaluation suites yet for bjarne-stroustrup, dababy, hikaru-nakamura, or yoda.",
+    "No model-based repetition-control suite yet.",
+    "No source-grounding judge yet for quote/trait mapping."
+  ],
   "versioning": {
     "convention": "semver pre-1.0: v0.MINOR.PATCH",
     "minor_bump_triggers": [
       "new persona added",
-      "new capability class (style, decision, integration)",
-      "core architecture change (composition model, pack format)"
+      "new capability class",
+      "core architecture change"
     ],
     "patch_bump_triggers": [
-      "pack refinement (existing persona)",
+      "pack refinement",
       "test fix or new test case",
       "documentation update"
     ],
     "tags": {
       "v0.1.0": "initial Codex-ready skill packaging baseline",
-      "v0.2.0": "personify plugin: style+decision tests, Jesse polar expressions, Yoda test"
+      "v0.2.0": "personify plugin: portable persona source and host package generators"
     }
   }
 }
