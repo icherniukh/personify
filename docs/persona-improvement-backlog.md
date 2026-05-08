@@ -25,9 +25,9 @@ weak bundled packs as the ceiling of the system.
 - Add a source-grounding review for every `research-backed` pack. Several packs
   list sources or provenance notes, but the repo does not yet contain a review
   artifact that ties key voice claims to source evidence.
-- Add repetition tests for mandatory expressive devices. Packs that require a
-  side note, parable, rhyme, yell, or catchphrase need tests that ensure the
-  device varies and does not become a template.
+- Add repetition tests for expressive devices. Packs that use a side note,
+  parable, rhyme, yell, or catchphrase need tests that ensure the device varies
+  and does not become a template.
 - Decide whether `test/packet_builder.py` should model every rich pack field or
   stay a narrow test helper. It currently composes required fields and
   `expressive_depth`, but ignores richer sections such as Jesse's
@@ -65,9 +65,9 @@ Publish blockers:
 
 - Upgrade source grounding. The pack is marked `draft` and the provenance says
   it is handcrafted from the repo contract, not researched source material.
-- Reconsider the mandatory aside. The pack requires a philosophical or epistemic
-  aside in every response. That can create repetition and may hurt practical
-  tasks if it fires mechanically.
+- Keep the philosophical aside optional and value-driven. The pack previously
+  required it in every response, which created repetition risk and could hurt
+  practical tasks if it fired mechanically.
 - Add evaluation cases for long-form reasoning and disagreement. Current tests
   mostly assert that specific strings appear in the packet.
 
@@ -75,8 +75,8 @@ Likely improvements:
 
 - Add source-backed speech markers from interviews, podcast monologues, or
   writing style.
-- Make the aside conditional: encouraged when it adds explanatory value, not
-  always mandatory.
+- Add repetition-control tests for the aside so it appears when useful without
+  becoming a predictable template.
 - Add negative tests for overproduced "rationalist essay" drift.
 
 ## Yoda
@@ -88,14 +88,16 @@ Publish blockers:
 - Decide whether fictional-character packs are acceptable public starter packs
   for the initial release. If yes, document that they are style assets and not
   official endorsements.
-- Revisit the mandatory mini-parable. It is expressive, but requiring it in
-  every response can become repetitive and can bury short answers.
+- Keep the mini-parable optional and task-sensitive. It is expressive, but
+  requiring it in every response can become repetitive and can bury short
+  answers.
 - Add evaluation cases that distinguish Yoda-like thematic fronting from simple
   broken English.
 
 Likely improvements:
 
-- Make parables optional or task-sensitive.
+- Add tests for concise answers where no parable is needed and longer answers
+  where the parable adds real value.
 - Add examples for concise technical answers where the persona remains visible
   without forcing a story.
 - Recheck source claims and cite the exact material behind the speech-pattern
@@ -141,7 +143,7 @@ Publish blockers:
 
 Likely improvements:
 
-- Make "scan every response for rhyme opportunities" less mechanical.
+- Keep rhyme/outburst behavior opportunistic rather than mechanical.
 - Add a toned-down variant or strength guidance so users can choose strong vs
   moderate execution.
 - Add examples where the pack stays useful on technical or serious tasks without
