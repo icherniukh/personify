@@ -3,12 +3,8 @@
 __pycache__/
 *.py[cod]
 
-# Generated host packages. Recreate with:
-#   python3 scripts/package.py build --target all
+# Build cache only — host packages (claude/, codex/, gemini/) are tracked.
 .agents/
-codex/
-claude/
-gemini/
 
 
 # Beads / Dolt files (added by bd init)

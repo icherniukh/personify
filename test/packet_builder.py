@@ -253,6 +253,10 @@ def load_jesse_packet() -> str:
     return load_packet(JESSE_PACK)
 
 
+def load_yoda_packet() -> str:
+    return load_packet(YODA_PACK)
+
+
 def load_packet(pack_path: Path | None = None, task: str = NEUTRAL_TASK) -> str:
     if pack_path is None:
         return build_instruction_packet(task, None)

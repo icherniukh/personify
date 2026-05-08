@@ -16,6 +16,7 @@
     "voice",
     "style"
   ],
+  "skills": "./skills/",
   "interface": {
     "displayName": "Personify",
     "shortDescription": "Portable persona packs for agent voice and reasoning style",

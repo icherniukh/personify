@@ -84,12 +84,24 @@
             "fact_vs_inference",
             "tradeoff_framing"
           ]
+        },
+        {
+          "id": "yoda-style",
+          "script": "yoda_style_test.py",
+          "persona": "yoda",
+          "cases": "yoda_cases.json",
+          "what_it_checks": [
+            "fronted_emphasis",
+            "aphoristic_compression",
+            "wisdom_first_reframing",
+            "speech_inversion"
+          ]
         }
       ]
     }
   },
   "known_gaps": [
-    "No live style/evaluation suites yet for bjarne-stroustrup, dababy, hikaru-nakamura, or yoda.",
+    "No live style/evaluation suites yet for bjarne-stroustrup, dababy, or hikaru-nakamura.",
     "No model-based repetition-control suite yet.",
     "No source-grounding judge yet for quote/trait mapping."
   ],
@@ -107,7 +119,10 @@
     ],
     "tags": {
       "v0.1.0": "initial Codex-ready skill packaging baseline",
-      "v0.2.0": "personify plugin: portable persona source and host package generators"
+      "v0.2.0": "personify plugin: portable persona source and host package generators",
+      "v0.3.0": "persona activation packet, source workflow repackaging, CI artifact publishing",
+      "v0.3.1": "reduce persona repetition traps, block mechanical repetition in contract test",
+      "v0.4.0": "yoda style test runner, versioning enforcement hook and CI check"
     }
   }
 }

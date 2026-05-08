@@ -26,12 +26,29 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Build generated host packages
-        run: python3 scripts/package.py build --target all
+      - name: Check version is not behind latest tag
+        run: |
+          git fetch --tags --quiet
+          LATEST_TAG=$(git tag -l 'v*' | sort -V | tail -1)
+          if [ -n "$LATEST_TAG" ]; then
+            TAG_VER="${LATEST_TAG#v}"
+            PKG_VER=$(python3 -c "import json; print(json.load(open('src/package.json'))['version'])")
+            python3 - <<EOF
+import sys
+def ver(s): return tuple(int(x) for x in s.split("."))
+tag, pkg = ver("$TAG_VER"), ver("$PKG_VER")
+if pkg < tag:
+    print(f"src/package.json {'.'.join(map(str,pkg))} is behind latest tag {'.'.join(map(str,tag))} — bump the version")
+    sys.exit(1)
+print(f"version ok: {'.'.join(map(str,pkg))} >= {'.'.join(map(str,tag))}")
+EOF
+          fi
+
+      - name: Verify packages are in sync with source
+        run: python3 scripts/package.py check --target all
 
       - name: Run package validation
         run: |
-          python3 scripts/package.py check --target all
           python3 test/package_test.py
           python3 test/claude_plugin_test.py
           python3 test/personality_pack_contract_test.py
@@ -39,20 +56,14 @@ jobs:
           python3 test/extractor_test.py
           python3 test/live_model_test.py --dry-run
 
-      - name: Verify ignored generated outputs
+      - name: Build tarballs for distribution
         run: |
-          git check-ignore -q codex/
-          git check-ignore -q claude/
-          git check-ignore -q gemini/
-          git diff --check
-
-      - name: Package host artifacts
-        run: |
+          python3 scripts/package.py build --target all
           mkdir -p dist
           tar -czf dist/personify-codex.tar.gz codex
           tar -czf dist/personify-claude.tar.gz claude .claude-plugin
-          tar -czf dist/personify-gemini.tar.gz gemini
-          tar -czf dist/personify-all-hosts.tar.gz codex claude gemini .claude-plugin
+          tar -czf dist/personify-gemini.tar.gz gemini gemini-extension.json
+          tar -czf dist/personify-all-hosts.tar.gz codex claude gemini .claude-plugin .codex-plugin gemini-extension.json
 
       - name: Upload generated packages
         uses: actions/upload-artifact@v4

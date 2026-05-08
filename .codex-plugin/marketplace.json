@@ -1,0 +1,14 @@
+{
+  "name": "personify",
+  "description": "Installable Codex plugin for portable persona packs.",
+  "owner": {
+    "name": "icherniukh"
+  },
+  "plugins": [
+    {
+      "name": "personify",
+      "description": "Portable persona packs for Codex with Personify persona skills.",
+      "source": "./codex"
+    }
+  ]
+}

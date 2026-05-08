@@ -24,6 +24,8 @@ TARGET_DIRS = {
     "gemini": ROOT_DIR / "gemini",
 }
 
+ALL_TARGETS = list(TARGET_DIRS) + ["root"]
+
 PERSONA_ENTRYPOINTS = {"use-persona", "as-persona", "list-personas"}
 CONTRACT_SKILLS = {"list-personas", "extract-persona"}
 COMMANDS = {
@@ -229,6 +231,45 @@ def claude_marketplace(meta: dict[str, object]) -> str:
     return json.dumps(payload, indent=2) + "\n"
 
 
+def root_claude_marketplace(meta: dict[str, object]) -> str:
+    payload = {
+        "name": meta["name"],
+        "description": "Installable Claude Code plugin for portable persona packs.",
+        "owner": {"name": meta["author"]["name"]},
+        "plugins": [
+            {
+                "name": meta["name"],
+                "description": "Portable persona packs for Claude Code with Personify persona skills.",
+                "source": "./claude",
+                "category": "productivity",
+                "tags": ["persona", "personality", "voice", "session"],
+            }
+        ],
+    }
+    return json.dumps(payload, indent=2) + "\n"
+
+
+def root_codex_marketplace(meta: dict[str, object]) -> str:
+    payload = {
+        "name": meta["name"],
+        "description": "Installable Codex plugin for portable persona packs.",
+        "owner": {"name": meta["author"]["name"]},
+        "plugins": [
+            {
+                "name": meta["name"],
+                "description": "Portable persona packs for Codex with Personify persona skills.",
+                "source": "./codex",
+            }
+        ],
+    }
+    return json.dumps(payload, indent=2) + "\n"
+
+
+def root_gemini_manifest(meta: dict[str, object]) -> str:
+    payload = {"name": meta["name"], "version": meta["version"], "contextFile": "gemini/GEMINI.md"}
+    return json.dumps(payload, indent=2) + "\n"
+
+
 def claude_readme() -> str:
     return """# Personify Claude Plugin
 
@@ -270,6 +311,28 @@ This directory is build output. Regenerate it with:
 python3 scripts/package.py build --target gemini
 ```
 """
+
+
+def build_root() -> None:
+    meta = read_meta()
+    write_text(ROOT_DIR / ".claude-plugin" / "marketplace.json", root_claude_marketplace(meta))
+    write_text(ROOT_DIR / ".codex-plugin" / "marketplace.json", root_codex_marketplace(meta))
+    write_text(ROOT_DIR / "gemini-extension.json", root_gemini_manifest(meta))
+
+
+def check_root() -> bool:
+    meta = read_meta()
+    checks = [
+        (ROOT_DIR / ".claude-plugin" / "marketplace.json", root_claude_marketplace(meta)),
+        (ROOT_DIR / ".codex-plugin" / "marketplace.json", root_codex_marketplace(meta)),
+        (ROOT_DIR / "gemini-extension.json", root_gemini_manifest(meta)),
+    ]
+    ok = True
+    for path, expected in checks:
+        if not path.exists() or path.read_text(encoding="utf-8") != expected:
+            print(f"drift: {path.relative_to(ROOT_DIR)} is missing or out of sync", file=sys.stderr)
+            ok = False
+    return ok
 
 
 def build_target(target_name: str) -> None:
@@ -350,8 +413,8 @@ def doctor() -> bool:
 
 def selected_targets(value: str) -> list[str]:
     if value == "all":
-        return list(TARGET_DIRS)
-    if value not in TARGET_DIRS:
+        return ALL_TARGETS
+    if value not in ALL_TARGETS:
         raise SystemExit(f"unknown target: {value}")
     return [value]
 
@@ -362,16 +425,25 @@ def main() -> int:
 
     for command in ("build", "check"):
         p = sub.add_parser(command)
-        p.add_argument("--target", choices=[*TARGET_DIRS, "all"], default="all")
+        p.add_argument("--target", choices=[*ALL_TARGETS, "all"], default="all")
     sub.add_parser("doctor")
 
     args = parser.parse_args()
     if args.command == "build":
         for target in selected_targets(args.target):
-            build_target(target)
+            if target == "root":
+                build_root()
+            else:
+                build_target(target)
         return 0
     if args.command == "check":
-        return 0 if all(check_target(target) for target in selected_targets(args.target)) else 1
+        results = []
+        for target in selected_targets(args.target):
+            if target == "root":
+                results.append(check_root())
+            else:
+                results.append(check_target(target))
+        return 0 if all(results) else 1
     if args.command == "doctor":
         return 0 if doctor() else 1
     return 1

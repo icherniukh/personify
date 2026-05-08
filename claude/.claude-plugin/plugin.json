@@ -1,0 +1,10 @@
+{
+  "name": "personify",
+  "version": "0.4.0",
+  "description": "Portable persona packs for Claude Code with Personify persona skills.",
+  "author": {
+    "name": "icherniukh"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/icherniukh/personify"
+}
