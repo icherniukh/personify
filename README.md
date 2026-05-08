@@ -104,6 +104,9 @@ Regenerate packages after editing `src/`:
 python3 scripts/package.py build --target all
 ```
 
+CI builds the same ignored host packages and uploads tarball artifacts for
+Codex, Claude, Gemini, and the combined host set.
+
 ## Validate
 
 ```bash

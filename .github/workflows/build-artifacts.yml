@@ -1,0 +1,87 @@
+name: Build host artifacts
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and validate generated host packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build generated host packages
+        run: python3 scripts/package.py build --target all
+
+      - name: Run package validation
+        run: |
+          python3 scripts/package.py check --target all
+          python3 test/package_test.py
+          python3 test/claude_plugin_test.py
+          python3 test/personality_pack_contract_test.py
+          python3 test/behavior_test.py
+          python3 test/extractor_test.py
+          python3 test/live_model_test.py --dry-run
+
+      - name: Verify ignored generated outputs
+        run: |
+          git check-ignore -q codex/
+          git check-ignore -q claude/
+          git check-ignore -q gemini/
+          git diff --check
+
+      - name: Package host artifacts
+        run: |
+          mkdir -p dist
+          tar -czf dist/personify-codex.tar.gz codex
+          tar -czf dist/personify-claude.tar.gz claude .claude-plugin
+          tar -czf dist/personify-gemini.tar.gz gemini
+          tar -czf dist/personify-all-hosts.tar.gz codex claude gemini .claude-plugin
+
+      - name: Upload generated packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: personify-host-packages
+          path: dist/*.tar.gz
+          if-no-files-found: error
+
+  release-assets:
+    name: Attach host packages to GitHub release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download generated packages
+        uses: actions/download-artifact@v4
+        with:
+          name: personify-host-packages
+          path: dist
+
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1 || \
+            gh release create "${GITHUB_REF_NAME}" \
+              --title "${GITHUB_REF_NAME}" \
+              --notes "Generated Personify host packages."
+          gh release upload "${GITHUB_REF_NAME}" dist/*.tar.gz --clobber
