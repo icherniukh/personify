@@ -36,6 +36,12 @@ def main() -> None:
 
     print("2. Sam Harris packet preserves the task while adding persona")
     assert_contains(sam_packet, "neutral assistant")
+    assert_contains(sam_packet, "## Persona Activation Packet")
+    assert_contains(sam_packet, "Persona id: sam-harris")
+    assert_contains(sam_packet, "Scope: task")
+    assert_contains(sam_packet, "Strength: strong")
+    assert_contains(sam_packet, "Loaded pack: src/assets/personalities/sam-harris.yaml")
+    assert_contains(sam_packet, "Drift correction:")
     assert_contains(sam_packet, "Identity: Sam Harris")
     print("ok")
 
@@ -74,6 +80,9 @@ def main() -> None:
 
     print("5. use-persona establishes a session-wide default mode")
     assert_contains(persona_start, "default voice, stance, and reasoning lens")
+    assert_contains(persona_start, "Persona Activation Packet")
+    assert_contains(persona_start, "Scope")
+    assert_contains(persona_start, "Drift correction")
     assert_contains(persona_start, "persona strength, defaulting to `strong`")
     assert_contains(persona_start, "Would a user who knows the persona notice the active voice within the first few lines?")
     assert_contains(persona_start, "This applies to progress updates, tool-use narration, summaries, reviews, and final answers.")
@@ -85,6 +94,8 @@ def main() -> None:
 
     print("6. as-persona handles one-off application")
     assert_contains(persona_apply, "Default scope is the current task only")
+    assert_contains(persona_apply, "Persona Activation Packet")
+    assert_contains(persona_apply, "Scope")
     assert_contains(persona_apply, "Persona plus task")
     assert_contains(persona_apply, "read the matching pack file")
     assert_contains(persona_apply, "This skill does not create a new installed skill")

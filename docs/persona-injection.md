@@ -66,10 +66,24 @@ A persona pack is a YAML asset. The contract requires sections for:
 - provenance and quality level
 
 When a persona is applied, those fields are treated as an overlay on top of the
-task. The current test harness models that overlay with a packet shaped like:
+task. The current test harness models that overlay with two explicit sections:
+a compact activation packet and the fuller personality overlay.
 
 ```text
 <task instructions>
+
+## Persona Activation Packet
+Persona id: <id>
+Display name: <display_name>
+Scope: <task | thread | session>
+Strength: strong
+Loaded pack: <path>
+Voice markers:
+- <marker>
+Reasoning habits:
+- <habit>
+Drift correction:
+- <reload/restore rule>
 
 ## Personality Overlay
 Identity: <display_name>
@@ -80,9 +94,9 @@ Overlay prompt:
 ...
 ```
 
-That packet is a test representation, not a separate production runtime. It is
-useful because it makes the intended composition order explicit: task first,
-persona second.
+That packet is a test representation and composition convention, not a separate
+production runtime. It is useful because it makes the intended composition order
+explicit: task first, compact persona anchor second, full persona overlay third.
 
 ## Session-Wide Activation
 
@@ -96,6 +110,7 @@ the assistant to keep a compact active-mode state in mind:
 - persona strength
 - a few voice markers
 - one or two structural habits
+- drift-correction rule
 
 This state is conversational state. It depends on the host assistant continuing
 to follow the skill's instructions across the session. If the state is lost, the
@@ -150,6 +165,7 @@ adherence to the loaded skill instructions.
 Known improvement areas:
 
 - make pack resolution less dependent on the model inferring file paths
+- use the activation packet consistently in generated host commands and tests
 - support user-defined asset roots without editing generated packages
 - improve generated commands so they pass clearer scope and persona arguments
 - add evaluation cases that test whether persona state survives multi-turn work

@@ -143,13 +143,42 @@ def parse_simple_yaml(path: Path) -> dict[str, object]:
     return data
 
 
-def build_instruction_packet(core_text: str, pack: dict[str, object] | None) -> str:
+def build_activation_packet(pack: dict[str, object], scope: str, source_path: Path | None) -> list[str]:
+    voice = pack["voice"]
+    voice_markers = [f"{key}: {value}" for key, value in voice.items()]
+    reasoning_habits = list(pack["reasoning_style"])
+    source = str(source_path.relative_to(ROOT_DIR)) if source_path else "unknown"
+
+    return [
+        "## Persona Activation Packet",
+        f"Persona id: {pack['id']}",
+        f"Display name: {pack['display_name']}",
+        f"Scope: {scope}",
+        "Strength: strong",
+        f"Loaded pack: {source}",
+        "Voice markers:",
+        *[f"- {item}" for item in voice_markers[:5]],
+        "Reasoning habits:",
+        *[f"- {item}" for item in reasoning_habits[:2]],
+        "Drift correction:",
+        "- If the response becomes generic, reload the pack and restore these markers before answering.",
+        "",
+    ]
+
+
+def build_instruction_packet(
+    core_text: str,
+    pack: dict[str, object] | None,
+    source_path: Path | None = None,
+    scope: str = "task",
+) -> str:
     if pack is None:
         return core_text.strip()
 
     sections = [
         core_text.strip(),
         "",
+        *build_activation_packet(pack, scope, source_path),
         "## Personality Overlay",
         f"Identity: {pack['display_name']}",
         f"Summary: {pack['summary']}",
@@ -227,7 +256,7 @@ def load_jesse_packet() -> str:
 def load_packet(pack_path: Path | None = None, task: str = NEUTRAL_TASK) -> str:
     if pack_path is None:
         return build_instruction_packet(task, None)
-    return build_instruction_packet(task, parse_simple_yaml(pack_path))
+    return build_instruction_packet(task, parse_simple_yaml(pack_path), source_path=pack_path)
 
 
 def load_architecture_neutral_packet() -> str:

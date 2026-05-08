@@ -124,13 +124,18 @@ Recommendation: do not use this as the default model.
 
 ## Near-Term Plan
 
-1. Define a Persona Activation Packet format in the docs and tests.
-2. Update `use-persona` and `as-persona` to name that packet explicitly.
-3. Update packet tests so rich pack fields are either composed or deliberately
-   excluded.
-4. Strengthen Gemini `GEMINI.md` and generated command prompts as host context
-   anchors.
-5. Re-evaluate MCP only after user-defined asset roots are designed.
+Completed in the first implementation pass:
+
+- Defined a Persona Activation Packet format in the docs and packet tests.
+- Updated `use-persona` and `as-persona` to name that packet explicitly.
+- Updated generated command prompts and Gemini context generation to reference
+  the packet model.
+
+Remaining follow-up:
+
+- Decide whether rich pack fields are composed or deliberately excluded from the
+  activation packet.
+- Re-evaluate MCP only after user-defined asset roots are designed.
 
 ## Research Sources
 

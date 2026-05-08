@@ -19,6 +19,28 @@ Possible scopes:
 
 If the user wants session-wide behavior, prefer `use-persona`.
 
+## Persona Activation Packet
+
+After loading the selected pack, construct a compact activation packet for the
+requested scope:
+
+```text
+Persona id: <pack id>
+Display name: <display_name>
+Scope: task | thread | session
+Strength: strong
+Loaded pack: <resolved pack path>
+Voice markers:
+- <three to five concrete voice/cadence markers>
+Reasoning habits:
+- <one or two reasoning_style items>
+Drift correction:
+- If the response becomes generic, reload the pack and restore these markers before answering.
+```
+
+Use this packet as the local composition anchor. The user usually does not need
+to see it; the output should show the persona through the answer itself.
+
 ## Persona Strength Default
 
 Default to a clearly noticeable persona, not a faint accent.
@@ -91,6 +113,9 @@ If you did not read the selected pack file, do not act like the persona was full
 ## Operating Rule
 
 Apply the task instructions first, then apply the personality overlay.
+
+Use the activation packet to preserve the selected scope and the most important
+voice/reasoning markers while completing the task.
 
 Do not flatten the persona merely to sound neutral, restrained, or professionally safe.
 Only reduce the stylistic effect when the user asks for that explicitly.

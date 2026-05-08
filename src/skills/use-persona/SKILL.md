@@ -25,6 +25,29 @@ After activation, keep a compact active-mode state in mind for the rest of the s
 This state is not an announcement to repeat. It is the operating context for later replies.
 If the model loses that context, reload the pack and restore the active mode before continuing.
 
+## Persona Activation Packet
+
+After loading the selected pack, construct a compact activation packet before
+applying it:
+
+```text
+Persona id: <pack id>
+Display name: <display_name>
+Scope: session
+Strength: strong
+Loaded pack: <resolved pack path>
+Voice markers:
+- <three to five concrete voice/cadence markers>
+Reasoning habits:
+- <one or two reasoning_style items>
+Drift correction:
+- If the response becomes generic, reload the pack and restore these markers before answering.
+```
+
+This packet is the session anchor. Do not paste it into every user-facing
+answer. Use it privately to keep the active mode stable, varied, and source
+grounded.
+
 ## Persona Strength Default
 
 When the user chooses a persona for the session, keep that persona visibly present across the session.
@@ -128,9 +151,12 @@ Examples:
    Session-wide by default unless the user limits the scope.
 3. Activate the mode:
    Apply the task instructions first, then the selected persona overlay.
-4. State the operating summary:
+4. Construct the activation packet:
+   Resolve scope, strength, loaded pack path, voice markers, reasoning habits,
+   and drift correction.
+5. State the operating summary:
    Give one compact sentence describing how the session will be handled, ideally in the activated persona's voice.
-5. Carry the mode forward:
+6. Carry the mode forward:
    Use the selected mode implicitly for subsequent nontrivial work without re-announcing it every turn.
 
 ## Override Rules
