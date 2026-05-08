@@ -136,6 +136,19 @@ Pack format is documented in:
 docs/personality-pack-contract.md
 ```
 
+The current persona injection model is documented in:
+
+```text
+docs/persona-injection.md
+```
+
+Open publishing and quality blockers are tracked in:
+
+```text
+docs/persona-improvement-backlog.md
+docs/persona-injection-research.md
+```
+
 Persona packs intentionally do not use local `guardrails` or `anti_patterns`
 sections. Improve them by strengthening voice, reasoning habits, examples, and
 evaluation coverage.
