@@ -3,6 +3,13 @@
 __pycache__/
 *.py[cod]
 
+# Generated host packages. Recreate with:
+#   python3 scripts/package.py build --target all
+.agents/
+codex/
+claude/
+gemini/
+
 
 # Beads / Dolt files (added by bd init)
 .dolt/

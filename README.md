@@ -90,7 +90,7 @@ src/skills/
 src/assets/personalities/
 ```
 
-Generated public packages live here and are versioned:
+Generated host packages are ignored build outputs:
 
 ```text
 codex/
