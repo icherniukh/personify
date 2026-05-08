@@ -33,15 +33,12 @@ jobs:
           if [ -n "$LATEST_TAG" ]; then
             TAG_VER="${LATEST_TAG#v}"
             PKG_VER=$(python3 -c "import json; print(json.load(open('src/package.json'))['version'])")
-            python3 - <<EOF
-import sys
-def ver(s): return tuple(int(x) for x in s.split("."))
-tag, pkg = ver("$TAG_VER"), ver("$PKG_VER")
-if pkg < tag:
-    print(f"src/package.json {'.'.join(map(str,pkg))} is behind latest tag {'.'.join(map(str,tag))} — bump the version")
-    sys.exit(1)
-print(f"version ok: {'.'.join(map(str,pkg))} >= {'.'.join(map(str,tag))}")
-EOF
+            LOWEST=$(printf '%s\n%s' "$PKG_VER" "$TAG_VER" | sort -V | head -1)
+            if [ "$LOWEST" = "$PKG_VER" ] && [ "$PKG_VER" != "$TAG_VER" ]; then
+              echo "src/package.json $PKG_VER is behind latest tag $TAG_VER — bump the version"
+              exit 1
+            fi
+            echo "version ok: $PKG_VER >= $TAG_VER"
           fi
 
       - name: Verify packages are in sync with source
