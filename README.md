@@ -1,160 +1,145 @@
-# Promptonality
+# Personify
 
-`promptonality` is a platform-agnostic source package for portable persona
-assets and dynamic composition.
+Portable persona packs for agent voice, cadence, and reasoning style.
 
-The project promise is asset-first:
+Personify is not a workflow catalog. It provides:
 
-- personas are YAML assets, not hardcoded skills
-- bundled personas are starter packs and regression fixtures
-- users should be able to add, update, validate, and compose their own packs
-- workflows stay separate from persona assets
-- generated install surfaces are derived outputs
-- persona packs do not include local guardrail or restriction sections
+- persona pack discovery
+- session-wide persona activation
+- one-off persona application
+- local persona-pack creation
+- research-backed persona-pack creation
+- Claude Code, Codex, and Gemini package adapters
 
-If adding a persona requires changing framework code or creating a wrapper skill,
-that is a bug in the framework direction.
+## Install
 
-## Core Model
+### Claude Code
 
-The framework has three moving parts:
+```bash
+claude plugin marketplace add icherniukh/personify
+claude plugin install personify@personify
+```
 
-1. **Persona assets**
-   YAML packs stored under an asset root.
-2. **Entrypoint skills**
-   `persona-list`, `persona-apply`, and `persona-start` discover and load packs.
-3. **Workflows**
-   Neutral workflow instructions such as orchestration or architecture review.
+Local checkout:
 
-Composition rule:
+```bash
+claude plugin marketplace add /path/to/personify
+claude plugin install personify@personify
+```
 
-- base workflow first
-- persona asset second
-- correctness, safety, and task completion win if the overlay conflicts
+Session-only:
 
-Static per-persona wrapper skills are not the active model. Historical examples
-remain under [`archive/`](./archive).
+```bash
+claude --plugin-dir /path/to/personify/claude
+```
 
-Pack-level `guardrails`, `anti_patterns`, and similar restriction sections are
-intentionally not part of the current pack shape. They made personas less
-creative, while the host model already supplies the necessary behavioral
-boundaries. Improve packs by strengthening positive persona material and
-evaluating outputs, not by adding local prohibitions.
+### Codex
 
-## Source Of Truth
+Codex currently exposes marketplace management in the CLI. Add the marketplace,
+then install or enable the plugin from the Codex plugin UI/runtime.
 
-Use `src/` as the authored source:
+```bash
+codex plugin marketplace add icherniukh/personify
+```
 
-- neutral metadata: [`src/package.json`](./src/package.json)
-- source skills: [`src/skills/`](./src/skills)
-- source asset root: [`src/assets/personalities/`](./src/assets/personalities)
+Local checkout:
 
-Do not treat generated Codex, Claude, Gemini, or root-level compatibility copies
-as authored truth. Regenerate platform packages from source.
+```bash
+codex plugin marketplace add /path/to/personify
+```
 
-## Persona Assets
+### Gemini CLI
 
-Bundled source packs live in:
+```bash
+gemini extensions install https://github.com/icherniukh/personify --consent
+```
+
+For local development:
+
+```bash
+gemini extensions link /path/to/personify/gemini --consent
+```
+
+## Commands
+
+Personify exposes four user-facing commands/skills:
+
+| Command | Use it for |
+| --- | --- |
+| `list-personas` | Show available persona packs |
+| `use-persona` | Make a persona the default for the session |
+| `as-persona` | Apply a persona to one task or thread |
+| `extract-persona` | Create a pack from web-grounded research |
+
+Portable natural-language examples:
+
+```text
+List available personas.
+Use the Hikaru Nakamura persona for this session.
+Apply the Sam Harris persona to this task.
+Research a persona pack for Ada Lovelace.
+```
+
+## Source
+
+Author source files here:
+
+```text
+src/package.json
+src/skills/
+src/assets/personalities/
+```
+
+Generated public packages live here and are versioned:
+
+```text
+codex/
+claude/
+gemini/
+```
+
+Regenerate packages after editing `src/`:
+
+```bash
+python3 scripts/package.py build --target all
+```
+
+## Validate
+
+```bash
+python3 scripts/package.py check --target all
+python3 test/package_test.py
+python3 test/claude_plugin_test.py
+python3 test/personality_pack_contract_test.py
+claude plugin validate .
+claude plugin validate claude
+gemini extensions validate gemini
+```
+
+## Persona Packs
+
+Bundled packs live in:
 
 ```text
 src/assets/personalities/
 ```
 
-List them with:
+List them locally with:
 
 ```bash
-python3 plugins/promptonality/scripts/persona_list.py
+python3 scripts/persona_list.py
 ```
 
-The list is intentionally dynamic. Do not maintain a manual catalog in this
-README. New user-created or generated packs should follow the contract in:
+Pack format is documented in:
 
 ```text
 docs/personality-pack-contract.md
 ```
 
-## Installation Surfaces
+Persona packs intentionally do not use local `guardrails` or `anti_patterns`
+sections. Improve them by strengthening voice, reasoning habits, examples, and
+evaluation coverage.
 
-Build all platform packages with:
+## License
 
-```bash
-python3 plugins/promptonality/scripts/package.py build --target all
-```
-
-Generated packages are ignored build outputs:
-
-- `codex/`
-- `claude/`
-- `gemini/`
-
-Codex, Claude, and Gemini are peer adapters. None is the canonical source.
-
-Use native local development flows for each host:
-
-- Codex: generated `.codex-plugin/plugin.json` under `codex/`
-- Claude: `claude --plugin-dir plugins/promptonality/claude`
-- Gemini: `gemini extensions link plugins/promptonality/gemini`
-
-## Active Source Skills
-
-- [`src/skills/persona-start/SKILL.md`](./src/skills/persona-start/SKILL.md)
-- [`src/skills/persona-apply/SKILL.md`](./src/skills/persona-apply/SKILL.md)
-- [`src/skills/persona-list/SKILL.md`](./src/skills/persona-list/SKILL.md)
-- [`src/skills/persona-extract/SKILL.md`](./src/skills/persona-extract/SKILL.md)
-- [`src/skills/persona-extract-online/SKILL.md`](./src/skills/persona-extract-online/SKILL.md)
-- [`src/skills/orchestrator-core/SKILL.md`](./src/skills/orchestrator-core/SKILL.md)
-- [`src/skills/architecture-review-core/SKILL.md`](./src/skills/architecture-review-core/SKILL.md)
-
-## Usage
-
-Use `persona-list` to inspect discovered packs.
-
-Use `persona-start` when a workflow-plus-pack combination should govern the
-session.
-
-Use `persona-apply` when the overlay should apply to one task or thread.
-
-Examples:
-
-- `List the available promptonality packs.`
-- `Use the Hikaru Nakamura persona for this architecture review.`
-- `Apply my local review-coach persona to this task.`
-- `Generate a new personality pack for this public figure.`
-
-## Testing
-
-Smoke test:
-
-```bash
-bash plugins/promptonality/test/run-test.sh
-```
-
-Package sync checks:
-
-```bash
-python3 plugins/promptonality/scripts/package.py check --target all
-python3 plugins/promptonality/scripts/package.py doctor
-```
-
-Live model comparison:
-
-```bash
-OPENAI_API_KEY=... OPENAI_MODEL=... \
-python3 plugins/promptonality/test/live_model_test.py --repeats 3
-```
-
-Architecture comparison:
-
-```bash
-OPENAI_API_KEY=... OPENAI_MODEL=... \
-python3 plugins/promptonality/test/architecture_live_test.py --repeats 3
-```
-
-Testing should move toward dynamic pack validation over every discovered asset,
-not hardcoded checks for a fixed bundled catalog.
-
-Persona quality evaluation is defined in:
-
-```text
-docs/persona-evaluation.md
-```
+MIT

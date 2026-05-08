@@ -1,84 +1,33 @@
-# Agent Instructions
+# AGENTS.md instructions for /Users/ivan/proj/personify
 
-This project uses **bd** (beads) for issue tracking. Run `bd prime` for full workflow context.
+- Always show progress before requesting input.
+- Task tracking: use `bd` (beads) by default. Never use TodoWrite or markdown task files.
+  - If the project uses GitHub issues as its primary tracker, prefer `gh issue` for project-facing work items: bugs, features, anything that needs a PR reference or team visibility. Use beads for personal/cross-project tracking in that case.
+  - Do not mirror the same item in both. Pick one per project and stay consistent.
+- Project status: use `bd ready` for unblocked work and `bd list --status=in_progress` for active work. Never infer status from git or file timestamps.
 
-## Quick Reference
+## Beads When GitHub Issues Is Primary
 
-```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --claim  # Claim work atomically
-bd close <id>         # Complete work
-bd dolt push          # Push beads data to remote
-```
+When a project uses GitHub issues as its canonical tracker, beads still has a role:
 
-## Non-Interactive Shell Commands
+- Session todos: things to do this session that do not warrant a GitHub issue.
+- Cross-project/personal tasks: work that spans repos or personal workflow.
+- Scratch capture: quick `bd q "..."` to not lose a thought mid-task; close it the same session.
+- `bd remember`: cross-session insights that are not tied to a specific GitHub issue.
 
-**ALWAYS use non-interactive flags** with file operations to avoid hanging on confirmation prompts.
+What beads is not for in this mode: bugs, features, backlog items. Those go to GitHub issues.
 
-Shell commands like `cp`, `mv`, and `rm` may be aliased to include `-i` (interactive) mode on some systems, causing the agent to hang indefinitely waiting for y/n input.
+## Context Recovery
 
-**Use these forms instead:**
-```bash
-# Force overwrite without prompting
-cp -f source dest           # NOT: cp source dest
-mv -f source dest           # NOT: mv source dest
-rm -f file                  # NOT: rm file
+When picking up previous work, search in this order:
 
-# For recursive operations
-rm -rf directory            # NOT: rm -r directory
-cp -rf source dest          # NOT: cp -r source dest
-```
+1. GitHub issues, if project uses them, or `bd list` / `bd show <id>`.
+2. Git history.
+3. Ask the user only if the above yield nothing.
 
-**Other commands that may prompt:**
-- `scp` - use `-o BatchMode=yes` for non-interactive
-- `ssh` - use `-o BatchMode=yes` to fail instead of prompting
-- `apt-get` - use `-y` flag
-- `brew` - use `HOMEBREW_NO_AUTO_UPDATE=1` env var
+## Factual Grounding
 
-<!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
-## Beads Issue Tracker
-
-This project uses **bd (beads)** for issue tracking. Run `bd prime` to see full workflow context and commands.
-
-### Quick Reference
-
-```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --claim  # Claim work
-bd close <id>         # Complete work
-```
-
-### Rules
-
-- Use `bd` for ALL task tracking — do NOT use TodoWrite, TaskCreate, or markdown TODO lists
-- Run `bd prime` for detailed command reference and session close protocol
-- Use `bd remember` for persistent knowledge — do NOT use MEMORY.md files
-
-## Session Completion
-
-**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
-
-**MANDATORY WORKFLOW:**
-
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run quality gates** (if code changed) - Tests, linters, builds
-3. **Update issue status** - Close finished work, update in-progress items
-4. **PUSH TO REMOTE** - This is MANDATORY:
-   ```bash
-   git pull --rebase
-   bd dolt push
-   git push
-   git status  # MUST show "up to date with origin"
-   ```
-5. **Clean up** - Clear stashes, prune remote branches
-6. **Verify** - All changes committed AND pushed
-7. **Hand off** - Provide context for next session
-
-**CRITICAL RULES:**
-- Work is NOT complete until `git push` succeeds
-- NEVER stop before pushing - that leaves work stranded locally
-- NEVER say "ready to push when you are" - YOU must push
-- If push fails, resolve and retry until it succeeds
-<!-- END BEADS INTEGRATION -->
+- When summarizing or analyzing documents, extract supporting quotes before synthesizing. Reason from quotes, not memory.
+- Say "I don't have enough information" rather than guess. Never fabricate details to fill gaps.
+- When making factual claims about code, configs, or external systems, verify by reading the source instead of relying on recollection.
+- Do not supplement document analysis with general knowledge unless explicitly asked.

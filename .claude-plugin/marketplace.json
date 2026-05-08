@@ -1,15 +1,16 @@
 {
-  "name": "local",
+  "name": "personify",
+  "description": "Installable Claude Code plugin for portable persona packs.",
   "owner": {
-    "name": "ivan"
+    "name": "icherniukh"
   },
   "plugins": [
     {
-      "name": "promptonality",
-      "description": "Portable personality packs for Claude Code with persona-list, persona-apply, persona-start, persona-extract, and persona-extract-online.",
-      "source": "./plugins/promptonality/claude-plugin",
-      "category": "workflow",
-      "tags": ["persona", "personality", "workflow", "session"]
+      "name": "personify",
+      "description": "Portable persona packs for Claude Code with Personify persona skills.",
+      "source": "./claude",
+      "category": "productivity",
+      "tags": ["persona", "personality", "voice", "session"]
     }
   ]
 }
