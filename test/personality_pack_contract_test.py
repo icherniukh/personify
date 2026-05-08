@@ -47,6 +47,13 @@ BLOCK_SECTIONS = {
 
 ALLOWED_QUALITY = {"draft", "reviewed", "research-backed"}
 FORBIDDEN_TOP_LEVEL = {"guardrails", "anti_patterns"}
+FORBIDDEN_MECHANICAL_PHRASES = (
+    "In every response",
+    "Topic does not matter",
+    "happens regardless",
+    "This is mandatory",
+    "Scan every response",
+)
 
 
 def top_level_keys(lines: list[str]) -> dict[str, str]:
@@ -115,6 +122,10 @@ def main() -> None:
 
         forbidden = sorted(FORBIDDEN_TOP_LEVEL & keys.keys())
         assert not forbidden, f"{path.name}: forbidden restriction fields present: {', '.join(forbidden)}"
+
+        text = "\n".join(lines)
+        mechanical = [phrase for phrase in FORBIDDEN_MECHANICAL_PHRASES if phrase in text]
+        assert not mechanical, f"{path.name}: mechanical repetition triggers present: {', '.join(mechanical)}"
 
         pack_id = keys["id"]
         assert pack_id == path.stem, f"{path.name}: id {pack_id!r} must match filename stem {path.stem!r}"
