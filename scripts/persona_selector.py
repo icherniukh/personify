@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -10,6 +11,8 @@ from typing import Literal
 
 
 SelectionMode = Literal["explicit", "auto", "random"]
+ROOT_DIR = Path(__file__).resolve().parents[1]
+BUNDLED_PERSONAS_DIR = ROOT_DIR / "src" / "assets" / "personalities"
 
 METADATA_FIELDS = (
     "summary",
@@ -83,6 +86,21 @@ class PersonaSelector:
         paths = sorted(directory.glob("*.yaml"))
         if not paths:
             raise ValueError(f"no persona packs found in {directory}")
+        return cls([load_pack(path) for path in paths])
+
+    @classmethod
+    def from_default_roots(cls) -> "PersonaSelector":
+        return cls.from_roots(
+            bundled_dir=BUNDLED_PERSONAS_DIR,
+            user_dir=user_personas_dir(),
+            hidden_file=hidden_personas_file(),
+        )
+
+    @classmethod
+    def from_roots(cls, *, bundled_dir: Path, user_dir: Path, hidden_file: Path) -> "PersonaSelector":
+        paths = discover_pack_paths(bundled_dir=bundled_dir, user_dir=user_dir, hidden_file=hidden_file)
+        if not paths:
+            raise ValueError("no persona packs found in bundled or user roots")
         return cls([load_pack(path) for path in paths])
 
     def select(self, request: PersonaSelectionRequest) -> PersonaSelectionResult:
@@ -201,6 +219,57 @@ def load_pack(path: Path) -> PersonaPack:
     )
 
 
+def xdg_data_home() -> Path:
+    return Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share"))
+
+
+def xdg_config_home() -> Path:
+    return Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+
+
+def user_personas_dir() -> Path:
+    return xdg_data_home() / "personify" / "personas"
+
+
+def hidden_personas_file() -> Path:
+    return xdg_config_home() / "personify" / "hidden.yaml"
+
+
+def parse_hidden_ids(path: Path) -> set[str]:
+    if not path.is_file():
+        return set()
+
+    hidden_ids: set[str] = set()
+    in_hidden_list = False
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped == "hidden:":
+            in_hidden_list = True
+            continue
+        if in_hidden_list and stripped.startswith("- "):
+            hidden_ids.add(stripped[2:].strip().strip("'\""))
+            continue
+        in_hidden_list = False
+        if stripped.startswith("- "):
+            hidden_ids.add(stripped[2:].strip().strip("'\""))
+    return hidden_ids
+
+
+def discover_pack_paths(*, bundled_dir: Path, user_dir: Path, hidden_file: Path) -> list[Path]:
+    paths_by_id: dict[str, Path] = {}
+    for directory in (bundled_dir, user_dir):
+        if not directory.is_dir():
+            continue
+        for path in sorted(directory.glob("*.yaml")):
+            pack_id = required_scalar(parse_top_level_yaml(path.read_text(encoding="utf-8").splitlines()), "id", path)
+            paths_by_id[pack_id] = path
+
+    hidden_ids = parse_hidden_ids(hidden_file)
+    return [paths_by_id[pack_id] for pack_id in sorted(paths_by_id) if pack_id not in hidden_ids]
+
+
 def required_scalar(data: dict[str, object], key: str, path: Path) -> str:
     value = data.get(key)
     if not isinstance(value, str) or not value:
@@ -256,7 +325,7 @@ def parse_nested_block(lines: list[str], start: int) -> tuple[object, int]:
 
 
 if __name__ == "__main__":
-    selector = PersonaSelector.from_directory(Path("src/assets/personalities"))
+    selector = PersonaSelector.from_default_roots()
     result = selector.select(
         PersonaSelectionRequest(
             mode="auto",

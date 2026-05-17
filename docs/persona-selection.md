@@ -18,7 +18,7 @@ from pathlib import Path
 
 from scripts.persona_selector import PersonaSelectionRequest, PersonaSelector
 
-selector = PersonaSelector.from_directory(Path("src/assets/personalities"))
+selector = PersonaSelector.from_default_roots()
 result = selector.select(
     PersonaSelectionRequest(
         mode="explicit",

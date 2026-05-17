@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -135,9 +136,57 @@ def test_loads_source_personality_packs_for_selection() -> None:
     assert "reasoning" in result.rationale
 
 
+def write_pack(path: Path, pack_id: str, *, summary: str, terminology: str = "") -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "\n".join(
+            [
+                f"id: {pack_id}",
+                f"display_name: {pack_id.title()}",
+                f"summary: {summary}",
+                "voice:",
+                "  tone: test",
+                "interaction_stance:",
+                "  - test stance",
+                "value_profile:",
+                "  - test value",
+                "reasoning_style:",
+                "  - test reasoning",
+                "preferred_terminology:",
+                f"  - {terminology or summary}",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
+def test_from_roots_uses_user_overrides_and_hidden_tombstones() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        bundled = root / "bundled"
+        user = root / "user"
+        hidden = root / "hidden.yaml"
+
+        write_pack(bundled / "sam.yaml", "sam", summary="calm analytic reasoning", terminology="reasoning")
+        write_pack(bundled / "yoda.yaml", "yoda", summary="wise force guidance", terminology="force")
+        write_pack(user / "sam.yaml", "sam", summary="user override chess speed", terminology="chess")
+        write_pack(user / "custom.yaml", "custom", summary="custom local workflow", terminology="workflow")
+        hidden.write_text("hidden:\n  - yoda\n", encoding="utf-8")
+
+        selector = PersonaSelector.from_roots(bundled_dir=bundled, user_dir=user, hidden_file=hidden)
+
+        overridden = selector.select(PersonaSelectionRequest(mode="auto", task="Need chess speed."))
+        hidden_result = selector.select(PersonaSelectionRequest(mode="random", task="x", include_ids={"yoda", "custom"}))
+
+    assert overridden.persona_id == "sam"
+    assert hidden_result.persona_id == "custom"
+
+
 if __name__ == "__main__":
     test_explicit_mode_returns_requested_persona_with_rationale()
     test_random_mode_is_seeded_and_respects_include_exclude_filters()
     test_auto_mode_scores_pack_metadata_without_persona_specific_branches()
     test_loads_source_personality_packs_for_selection()
+    test_from_roots_uses_user_overrides_and_hidden_tombstones()
     print("=== persona selector test passed ===")

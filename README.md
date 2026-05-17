@@ -26,8 +26,11 @@ gemini extensions install https://github.com/icherniukh/personify --consent
 ### OpenCode
 
 ```bash
-# Copy skills to your global OpenCode config directory
+# Copy skills and commands to your global OpenCode config directory
+mkdir -p ~/.config/opencode/skills
 cp -r opencode/skills/* ~/.config/opencode/skills/
+mkdir -p ~/.config/opencode/commands
+cp -r opencode/commands/* ~/.config/opencode/commands/
 ```
 
 ### Pi

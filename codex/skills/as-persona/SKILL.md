@@ -91,7 +91,14 @@ Resolve the requested composition in this order:
 
 ## Mandatory Pack Load
 
-When the user names a specific persona, read the matching pack file from `references/personality-packs/` before answering.
+When the user names a specific persona, read the matching pack file from the discovered persona roots before answering.
+
+Use the same overlay resolution as `list-personas`:
+
+1. Load bundled packs from the packaged skill's `references/personality-packs/` directory, or from `src/assets/personalities/` when running from the source repo.
+2. Load user-owned packs from `${XDG_DATA_HOME:-~/.local/share}/personify/personas/`.
+3. If a user-owned pack has the same `id` as a bundled pack, the user-owned pack overrides the bundled pack.
+4. If `${XDG_CONFIG_HOME:-~/.config}/personify/hidden.yaml` contains the selected id, treat it as hidden and ask the user to choose a visible pack or restore it.
 
 Treat that file as the authoritative overlay for:
 
