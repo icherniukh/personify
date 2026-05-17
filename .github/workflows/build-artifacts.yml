@@ -60,7 +60,9 @@ jobs:
           tar -czf dist/personify-codex.tar.gz codex
           tar -czf dist/personify-claude.tar.gz claude .claude-plugin
           tar -czf dist/personify-gemini.tar.gz gemini gemini-extension.json
-          tar -czf dist/personify-all-hosts.tar.gz codex claude gemini .claude-plugin .codex-plugin gemini-extension.json
+          tar -czf dist/personify-opencode.tar.gz opencode
+          tar -czf dist/personify-pi.tar.gz pi package.json
+          tar -czf dist/personify-all-hosts.tar.gz codex claude gemini opencode pi .claude-plugin .codex-plugin gemini-extension.json package.json
 
       - name: Upload generated packages
         uses: actions/upload-artifact@v4

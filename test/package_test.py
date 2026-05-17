@@ -83,9 +83,35 @@ def main() -> None:
     for command_name in EXPECTED_COMMANDS:
         assert (ROOT_DIR / "codex" / "commands" / f"{command_name}.md").is_file()
         assert (ROOT_DIR / "gemini" / "commands" / f"{command_name}.toml").is_file()
+        assert (ROOT_DIR / "opencode" / "commands" / f"{command_name}.md").is_file()
     print("ok")
 
-    print("6. release metadata")
+    print("6a. opencode skill layout")
+    opencode_skills_dir = ROOT_DIR / "opencode" / "skills"
+    assert opencode_skills_dir.is_dir()
+    assert sorted(p.name for p in opencode_skills_dir.iterdir() if p.is_dir()) == sorted(EXPECTED_COMMANDS)
+    for skill_name in EXPECTED_COMMANDS:
+        assert (opencode_skills_dir / skill_name / "SKILL.md").is_file()
+    print("ok")
+
+    print("6b. pi skill layout")
+    pi_skills_dir = ROOT_DIR / "pi" / "skills"
+    assert pi_skills_dir.is_dir()
+    assert sorted(p.name for p in pi_skills_dir.iterdir() if p.is_dir()) == sorted(EXPECTED_COMMANDS)
+    for skill_name in EXPECTED_COMMANDS:
+        assert (pi_skills_dir / skill_name / "SKILL.md").is_file()
+    pi_pkg = json.loads((ROOT_DIR / "pi" / "package.json").read_text(encoding="utf-8"))
+    assert "pi-package" in pi_pkg["keywords"]
+    assert pi_pkg["pi"]["skills"] == ["./skills"]
+    print("ok")
+
+    print("6c. root pi manifest")
+    root_pkg = json.loads((ROOT_DIR / "package.json").read_text(encoding="utf-8"))
+    assert "pi-package" in root_pkg["keywords"]
+    assert root_pkg["pi"]["skills"] == ["./pi/skills"]
+    print("ok")
+
+    print("7. release metadata")
     assert LICENSE.is_file(), "missing LICENSE file"
     assert "MIT License" in LICENSE.read_text(encoding="utf-8")
     marketplace = json.loads(ROOT_CLAUDE_MARKETPLACE.read_text(encoding="utf-8"))

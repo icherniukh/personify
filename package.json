@@ -1,0 +1,25 @@
+{
+  "name": "personify",
+  "version": "0.4.0",
+  "description": "Portable persona packs and adapters that make agent responses adopt a selected voice, cadence, and reasoning lens",
+  "author": {
+    "name": "icherniukh",
+    "email": "all4you2day@gmail.com",
+    "url": "https://github.com/icherniukh"
+  },
+  "homepage": "https://github.com/icherniukh/personify",
+  "repository": "https://github.com/icherniukh/personify",
+  "license": "MIT",
+  "keywords": [
+    "personality",
+    "persona",
+    "voice",
+    "style",
+    "pi-package"
+  ],
+  "pi": {
+    "skills": [
+      "./pi/skills"
+    ]
+  }
+}

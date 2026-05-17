@@ -122,13 +122,15 @@ Generate the full Personify pack YAML grounded in research. Requirements:
 
 ### Step 8: Write the file
 
-Write the YAML to:
+Write user-created persona YAML to the persistent user persona directory:
 
 ```
-src/assets/personalities/<id>.yaml
+${XDG_DATA_HOME:-~/.local/share}/personify/personas/<id>.yaml
 ```
 
-relative to the source root (e.g. `src/assets/personalities/hikaru-nakamura.yaml`). Do not only output it to conversation — the file is the deliverable. Confirm the path after writing.
+Create the directory if it does not exist. This directory is user-owned and survives plugin updates. Do not write newly extracted user packs into bundled skill directories or `src/assets/personalities/` unless the user explicitly asks to change the project’s bundled starter packs.
+
+If the new pack uses the same `id` as a bundled pack, it becomes the user override for that persona during listing and activation. Do not only output it to conversation — the file is the deliverable. Confirm the path after writing.
 
 ## Quality Rules
 

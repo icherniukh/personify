@@ -15,13 +15,25 @@ claude plugin install personify@personify
 
 ```bash
 codex plugin marketplace add icherniukh/personify
-codex plugin install personify@personify
 ```
 
 ### Gemini CLI
 
 ```bash
 gemini extensions install https://github.com/icherniukh/personify --consent
+```
+
+### OpenCode
+
+```bash
+# Copy skills to your global OpenCode config directory
+cp -r opencode/skills/* ~/.config/opencode/skills/
+```
+
+### Pi
+
+```bash
+pi install git:github.com/icherniukh/personify
 ```
 
 ## Commands
@@ -51,6 +63,9 @@ python3 scripts/package.py build --target all
 ```
 
 Pack format: `docs/personality-pack-contract.md`
+
+Persona activation adds prompt context. See `docs/token-overhead.md` for the
+current per-pack overhead estimate and the calculation method.
 
 ## License
 

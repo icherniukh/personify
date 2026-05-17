@@ -9,11 +9,20 @@ Use this skill when the user wants to know which personify persona assets are cu
 
 ## Source Of Truth
 
-Source persona assets currently live under:
+Persona discovery uses a two-directory overlay:
 
-- `src/assets/personalities/`
+- Bundled starter packs: `src/assets/personalities/`
+- User-owned packs: `${XDG_DATA_HOME:-~/.local/share}/personify/personas/`
+- Hidden bundled ids: `${XDG_CONFIG_HOME:-~/.config}/personify/hidden.yaml`
 
-Read those YAML files directly when listing available personas.
+Read those YAML files directly when listing available personas. Load bundled packs first, then load user-owned packs. If a user-owned pack has the same `id` as a bundled pack, the user-owned pack overrides the bundled one. If `hidden.yaml` contains an id, suppress that id from the listing.
+
+Expected hidden-file shape:
+
+```yaml
+hidden:
+  - bundled-pack-id
+```
 
 An optional helper script may also be present:
 
@@ -23,6 +32,8 @@ python3 scripts/persona_list.py
 
 Only use that helper if the repo-relative path exists from your current working directory.
 Do not assume the current working directory is the repository root.
+
+Packaged skills bundle their starter packs under `references/personality-packs/`, but persistent user-created packs still live in the XDG user directory above. Plugin updates may rebuild bundled skill directories; they must not touch the user-owned persona directory.
 
 ## What To Report
 

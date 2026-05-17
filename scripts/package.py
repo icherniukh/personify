@@ -22,6 +22,8 @@ TARGET_DIRS = {
     "codex": ROOT_DIR / "codex",
     "claude": ROOT_DIR / "claude",
     "gemini": ROOT_DIR / "gemini",
+    "opencode": ROOT_DIR / "opencode",
+    "pi": ROOT_DIR / "pi",
 }
 
 ALL_TARGETS = list(TARGET_DIRS) + ["root"]
@@ -95,11 +97,29 @@ def persona_list_script() -> str:
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 
 SKILL_DIR = Path(__file__).resolve().parents[1]
-PERSONALITIES_DIR = SKILL_DIR / "references" / "personality-packs"
+BUNDLED_PERSONAS_DIR = SKILL_DIR / "references" / "personality-packs"
+HEADER_KEYS = {"id", "display_name", "summary", "quality_level"}
+
+
+def xdg_data_home() -> Path:
+    return Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share"))
+
+
+def xdg_config_home() -> Path:
+    return Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+
+
+def user_personas_dir() -> Path:
+    return xdg_data_home() / "personify" / "personas"
+
+
+def hidden_personas_file() -> Path:
+    return xdg_config_home() / "personify" / "hidden.yaml"
 
 
 def parse_pack_header(path: Path) -> dict[str, str]:
@@ -110,14 +130,53 @@ def parse_pack_header(path: Path) -> dict[str, str]:
         if ": " not in line:
             continue
         key, value = line.split(": ", 1)
-        if key in {"id", "display_name", "summary", "quality_level"}:
+        if key in HEADER_KEYS:
             payload[key] = value
     return payload
 
 
+def parse_hidden_ids(path: Path) -> set[str]:
+    if not path.is_file():
+        return set()
+
+    hidden_ids: set[str] = set()
+    in_hidden_list = False
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped == "hidden:":
+            in_hidden_list = True
+            continue
+        if in_hidden_list and stripped.startswith("- "):
+            hidden_ids.add(stripped[2:].strip().strip("'\\""))
+            continue
+        in_hidden_list = False
+        if stripped.startswith("- "):
+            hidden_ids.add(stripped[2:].strip().strip("'\\""))
+    return hidden_ids
+
+
+def load_personas(*, bundled_dir: Path = BUNDLED_PERSONAS_DIR, user_dir: Path | None = None, hidden_file: Path | None = None) -> list[dict[str, str]]:
+    user_dir = user_personas_dir() if user_dir is None else user_dir
+    hidden_file = hidden_personas_file() if hidden_file is None else hidden_file
+
+    personas: dict[str, dict[str, str]] = {}
+    for directory in (bundled_dir, user_dir):
+        if not directory.is_dir():
+            continue
+        for path in sorted(directory.glob("*.yaml")):
+            payload = parse_pack_header(path)
+            pack_id = payload.get("id")
+            if pack_id:
+                personas[pack_id] = payload
+
+    hidden_ids = parse_hidden_ids(hidden_file)
+    return [personas[pack_id] for pack_id in sorted(personas) if pack_id not in hidden_ids]
+
+
 def main() -> None:
-    for path in sorted(PERSONALITIES_DIR.glob("*.yaml")):
-        payload = parse_pack_header(path)
+    for payload in load_personas():
         print(f"{payload['id']}\\t{payload['display_name']}\\t{payload['quality_level']}\\t{payload['summary']}")
 
 
@@ -171,6 +230,15 @@ prompt = {json.dumps(prompt)}
 """
 
 
+def opencode_command(name: str, spec: dict[str, str]) -> str:
+    return f"""---
+description: {spec["description"]}
+---
+
+{spec["prompt"]}
+"""
+
+
 def package_codex_commands(target: Path) -> None:
     commands_dir = target / "commands"
     commands_dir.mkdir(parents=True, exist_ok=True)
@@ -183,6 +251,13 @@ def package_gemini_commands(target: Path) -> None:
     commands_dir.mkdir(parents=True, exist_ok=True)
     for name, spec in sorted(COMMANDS.items()):
         write_text(commands_dir / f"{name}.toml", gemini_command(spec))
+
+
+def package_opencode_commands(target: Path) -> None:
+    commands_dir = target / "commands"
+    commands_dir.mkdir(parents=True, exist_ok=True)
+    for name, spec in sorted(COMMANDS.items()):
+        write_text(commands_dir / f"{name}.md", opencode_command(name, spec))
 
 
 def codex_manifest(meta: dict[str, object]) -> str:
@@ -313,11 +388,72 @@ python3 scripts/package.py build --target gemini
 """
 
 
+def opencode_readme() -> str:
+    return """# Personify OpenCode Skills
+
+Generated OpenCode skills package for `personify`.
+
+This directory is build output. Regenerate it with:
+
+```bash
+python3 scripts/package.py build --target opencode
+```
+"""
+
+
+def pi_manifest(meta: dict[str, object]) -> str:
+    payload = {
+        "name": meta["name"],
+        "version": meta["version"],
+        "description": meta["description"],
+        "author": meta["author"],
+        "homepage": meta["homepage"],
+        "repository": meta["repository"],
+        "license": meta["license"],
+        "keywords": [*meta["keywords"], "pi-package"],
+        "pi": {
+            "skills": ["./skills"],
+        },
+    }
+    return json.dumps(payload, indent=2) + "\n"
+
+
+def pi_readme() -> str:
+    return """# Personify Pi Package
+
+Generated Pi coding agent package for `personify`.
+
+This directory is build output. Regenerate it with:
+
+```bash
+python3 scripts/package.py build --target pi
+```
+"""
+
+
+def root_pi_manifest(meta: dict[str, object]) -> str:
+    payload = {
+        "name": meta["name"],
+        "version": meta["version"],
+        "description": meta["description"],
+        "author": meta["author"],
+        "homepage": meta["homepage"],
+        "repository": meta["repository"],
+        "license": meta["license"],
+        "keywords": [*meta["keywords"], "pi-package"],
+        "pi": {
+            "skills": ["./pi/skills"],
+        },
+    }
+    return json.dumps(payload, indent=2) + "\n"
+
+
 def build_root() -> None:
     meta = read_meta()
     write_text(ROOT_DIR / ".claude-plugin" / "marketplace.json", root_claude_marketplace(meta))
     write_text(ROOT_DIR / ".codex-plugin" / "marketplace.json", root_codex_marketplace(meta))
     write_text(ROOT_DIR / "gemini-extension.json", root_gemini_manifest(meta))
+    write_text(ROOT_DIR / "package.json", root_pi_manifest(meta))
 
 
 def check_root() -> bool:
@@ -326,6 +462,7 @@ def check_root() -> bool:
         (ROOT_DIR / ".claude-plugin" / "marketplace.json", root_claude_marketplace(meta)),
         (ROOT_DIR / ".codex-plugin" / "marketplace.json", root_codex_marketplace(meta)),
         (ROOT_DIR / "gemini-extension.json", root_gemini_manifest(meta)),
+        (ROOT_DIR / "package.json", root_pi_manifest(meta)),
     ]
     ok = True
     for path, expected in checks:
@@ -353,6 +490,12 @@ def build_target(target_name: str) -> None:
         write_text(target / "GEMINI.md", gemini_context())
         write_text(target / "README.md", gemini_readme())
         package_gemini_commands(target)
+    elif target_name == "opencode":
+        write_text(target / "README.md", opencode_readme())
+        package_opencode_commands(target)
+    elif target_name == "pi":
+        write_text(target / "package.json", pi_manifest(meta))
+        write_text(target / "README.md", pi_readme())
     else:
         raise ValueError(f"unknown target: {target_name}")
 
