@@ -65,7 +65,7 @@ def test_random_mode_is_seeded_and_respects_include_exclude_filters() -> None:
             pack("sam-harris"),
             pack("leon"),
             pack("yoda"),
-            pack("bjarne-stroustrup"),
+            pack("dababy"),
         ]
     )
     request = PersonaSelectionRequest(
@@ -90,7 +90,7 @@ def test_auto_mode_scores_pack_metadata_without_persona_specific_branches() -> N
     selector = PersonaSelector(
         [
             pack(
-                "bjarne-stroustrup",
+                "systems-engineer",
                 summary="Engineering-first lens for abstraction and maintainability.",
                 reasoning_style=[
                     "weigh efficiency, abstraction, and implementation cost",
@@ -117,7 +117,7 @@ def test_auto_mode_scores_pack_metadata_without_persona_specific_branches() -> N
         )
     )
 
-    assert result.persona_id == "bjarne-stroustrup"
+    assert result.persona_id == "systems-engineer"
     assert "metadata affinity" in result.rationale
     assert "interface" in result.rationale
 

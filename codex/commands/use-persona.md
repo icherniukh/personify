@@ -3,4 +3,4 @@ description: Use a Personify persona as the default voice and reasoning lens for
 argument-hint: <persona> [session goal]
 ---
 
-Use the use-persona skill to activate this persona for the session. Load the matching pack and construct the Persona Activation Packet before applying it. User arguments: $ARGUMENTS
+Use the use-persona skill to activate this persona for the session: resolve the matching pack, construct the Persona Activation Packet, and apply the requested scope after the user's task and project instructions. User arguments: $ARGUMENTS

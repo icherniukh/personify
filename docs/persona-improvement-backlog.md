@@ -19,9 +19,9 @@ weak bundled packs as the ceiling of the system.
   the thematic side note mandatory in every response, while the current pack
   keeps the same core material but treats canon references and side notes as
   varied improvisation.
-- Promote or fix `draft` packs before public release. `bjarne-stroustrup`,
-  `sam-harris`, and `yoda` all claim researched or curated provenance but still
-  have `quality_level: draft`.
+- Promote or fix `draft` packs before public release. `sam-harris` and `yoda`
+  both claim researched or curated provenance but still have
+  `quality_level: draft`.
 - Add a source-grounding review for every `research-backed` pack. Several packs
   list sources or provenance notes, but the repo does not yet contain a review
   artifact that ties key voice claims to source evidence.
@@ -33,28 +33,6 @@ weak bundled packs as the ceiling of the system.
   `expressive_depth`, but ignores richer sections such as Jesse's
   `canonical_references` / `emotional_poles` and DaBaby's `research_basis` /
   `signature_language_markers`.
-
-## Bjarne Stroustrup
-
-Current state: compact and coherent, but thin.
-
-Publish blockers:
-
-- Upgrade source grounding before keeping the pack in the public starter set.
-  The provenance says it is derived from official bio/FAQ/quotes/interviews, but
-  the pack does not list the actual sources.
-- Add evaluation cases. The pack is mostly engineering taste words: abstraction,
-  complexity, interface, cost. It needs behavioral tests that distinguish it
-  from a generic senior-engineer voice.
-- Add structured sources and trait mappings, not only a prose provenance note.
-
-Likely improvements:
-
-- Add more language markers from Stroustrup's actual writing and talks.
-- Strengthen the difference between "simplicity", "zero-overhead", "general
-  purpose", "type safety", "performance", and "evolution".
-- Add examples where the pack pushes back on both over-abstraction and
-  under-designed local hacks.
 
 ## Sam Harris
 

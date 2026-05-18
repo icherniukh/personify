@@ -1,7 +1,7 @@
 # Persona Injection Research
 
-This note records the current design options for making persona activation more
-reliable across Codex, Claude, and Gemini.
+This note records the current decision and remaining research path for making
+persona activation more reliable across Codex, Claude, Gemini, OpenCode, and Pi.
 
 ## Current State
 
@@ -20,12 +20,115 @@ Generated packages preserve the same source model but differ by host:
   markdown.
 - Claude gets `.claude-plugin/plugin.json`, a marketplace manifest, and skills.
 - Gemini gets `gemini-extension.json`, `GEMINI.md`, commands, and skills.
+- OpenCode gets generated skills and command markdown for manual install.
+- Pi gets a package manifest and generated skills.
 
 The invariant is the source model under `src/`, not identical output shape.
 
+## Decision
+
+Keep the deterministic Persona Activation Packet as the default activation model.
+
+That means activation should always follow the same sequence:
+
+1. resolve the selected pack,
+2. read the pack file,
+3. construct the Persona Activation Packet,
+4. apply task and project instructions first,
+5. apply the persona overlay second,
+6. carry or discard active-mode state according to the requested scope.
+
+This is the right default because it preserves Personify's core promise: personas
+are data assets, not per-persona wrapper code. It is also the easiest path to
+test because the packet can be rendered in fixtures, checked for expected
+fields, and compared against neutral or baseline prompts.
+
+## Improvement Track
+
+The next improvement should be evidence-driven, not rhetorical.
+
+Use the activation benchmark with at least three prompt treatments:
+
+1. **Neutral Baseline**
+   The task runs with no persona overlay.
+2. **Plain Prepend Baseline**
+   The task runs with a simple instruction such as "Respond like Sam Harris" or
+   "Use the Jesse Pinkman persona" before the user task.
+3. **PAP + Self-Check**
+   The task runs with the full Personify packet, loaded pack fields, scope, and
+   per-reply drift-correction check.
+
+Judge all three on:
+
+- task success
+- persona recognizability
+- functional delta from neutral
+- reasoning or framing delta
+- repetition control
+- whether the output stays useful after the persona overlay
+
+The plain prepend baseline is allowed to be weak. A weak plain baseline is part
+of the measurement, not a reason to fail the run. The strict requirement is that
+PAP preserves task quality and earns an overall advantage over plain prepend.
+
+The claim to prove is narrow: PAP plus self-check should hold persona fidelity
+and reasoning/style delta better than a plain prepend while preserving task
+quality.
+
+Run a smoke version without API calls:
+
+```bash
+python3 test/activation_benchmark.py --dry-run --persona sam-harris --case hidden-assumption
+```
+
+Run a focused live comparison:
+
+```bash
+python3 test/activation_benchmark.py --api openrouter --persona sam-harris --case hidden-assumption --repeats 1
+```
+
+Run the full benchmark matrix when release confidence matters:
+
+```bash
+python3 test/activation_benchmark.py --api openrouter --persona all --repeats 3
+```
+
+By default, live benchmark runs write both machine-readable and human-readable
+outputs under the repo-local ignored `benchmark-runs/` directory:
+
+```text
+benchmark-runs/<run-id>.jsonl
+benchmark-runs/<run-id>.md
+```
+
+The markdown report is the human review surface. It records provider, generator
+model, judge model, and model-pair name in a run metadata table. Each trial then
+uses grouped tables for case details, judge checks, score comparison, validation
+status, and neutral / plain prepend / PAP answer comparison. The JSONL file is
+kept as the replay/debug log.
+
+OpenRouter model rotation is configured in:
+
+```text
+config/activation_benchmark_models.json
+```
+
+When `--model`, `--judge-model`, `OPENROUTER_MODEL`, and
+`OPENROUTER_JUDGE_MODEL` are not set, the runner rotates to the next configured
+OpenRouter pair and stores rotation state under `benchmark-runs/`. Add a new
+entry to the config's `openrouter.pairs` list to extend the rotation.
+
+Override the rotation for one run with:
+
+```bash
+OPENROUTER_MODEL=moonshotai/kimi-k2.6 \
+OPENROUTER_JUDGE_MODEL=x-ai/grok-4.3 \
+python3 test/activation_benchmark.py --api openrouter --persona all --repeats 3
+```
+
 ## Option 1: Deterministic Activation Packet
 
-Generate or specify a compact "Persona Activation Packet" from the selected YAML
+Generate or specify a compact Persona Activation Packet from the selected YAML
 pack:
 
 - identity
@@ -53,7 +156,7 @@ Risks:
 - session-wide state can drift in long contexts
 - user-defined external asset roots remain awkward
 
-Recommendation: implement first.
+Status: selected default.
 
 ## Option 2: Host Context Anchors
 
@@ -67,6 +170,8 @@ Examples:
 - Claude: tune plugin skill descriptions and docs for namespaced skill use.
 - Codex: tune plugin metadata, commands, and skill descriptions so invocation is
   clearer.
+- OpenCode and Pi: keep generated commands explicit about pack resolution,
+  packet construction, and scope.
 
 Benefits:
 
@@ -80,7 +185,8 @@ Risks:
 - host behavior differs and can drift
 - context anchors can become stale if they duplicate source docs
 
-Recommendation: implement narrowly after option 1.
+Status: implement narrowly where generated packages already have command or
+context surfaces.
 
 ## Option 3: MCP Or Sidecar Composer
 
@@ -101,8 +207,8 @@ Risks:
 - still cannot silently rewrite every future turn unless the host exposes a
   reliable session-state API
 
-Recommendation: defer until external asset roots or deterministic composition
-become painful enough to justify the machinery.
+Status: defer until external asset roots or deterministic composition become
+painful enough to justify the machinery.
 
 ## Option 4: Generated Per-Persona Skills
 
@@ -120,22 +226,8 @@ Risks:
 - creates drift and host-specific bloat
 - makes bundled personas look like the product boundary
 
-Recommendation: do not use this as the default model.
-
-## Near-Term Plan
-
-Completed in the first implementation pass:
-
-- Defined a Persona Activation Packet format in the docs and packet tests.
-- Updated `use-persona` and `as-persona` to name that packet explicitly.
-- Updated generated command prompts and Gemini context generation to reference
-  the packet model.
-
-Remaining follow-up:
-
-- Decide whether rich pack fields are composed or deliberately excluded from the
-  activation packet.
-- Re-evaluate MCP only after user-defined asset roots are designed.
+Status: reject as the default model. Per-persona wrappers should only exist as
+compatibility shims if a host runtime forces that shape.
 
 ## Research Sources
 

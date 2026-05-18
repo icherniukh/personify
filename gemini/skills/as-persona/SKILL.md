@@ -19,6 +19,20 @@ Possible scopes:
 
 If the user wants session-wide behavior, prefer `use-persona`.
 
+## Activation Lifecycle
+
+Activation is an instruction sequence, not a hidden runtime switch.
+
+1. Resolve the requested persona id from discovered bundled and user-owned packs.
+2. Read the resolved pack file before claiming the persona is active.
+3. Construct the Persona Activation Packet from the loaded pack.
+4. Apply the user's task and project instructions first, then apply the persona overlay.
+5. Keep the compact active-mode state only for the requested task, thread, or session scope.
+6. Reload the resolved pack before answering if the host context no longer contains the active-mode state.
+
+Activation is not storage. The host conversation state is the storage mechanism,
+and the loaded pack plus activation packet are the recovery mechanism.
+
 ## Persona Activation Packet
 
 After loading the selected pack, construct a compact activation packet for the

@@ -63,6 +63,16 @@
           ]
         },
         {
+          "id": "activation-benchmark",
+          "script": "activation_benchmark.py",
+          "what_it_checks": [
+            "neutral_baseline",
+            "plain_prepend_baseline",
+            "pap_self_check",
+            "pap_advantage_judging"
+          ]
+        },
+        {
           "id": "jesse-style",
           "script": "jesse_style_test.py",
           "persona": "jesse-pinkman",
@@ -101,7 +111,7 @@
     }
   },
   "known_gaps": [
-    "No live style/evaluation suites yet for bjarne-stroustrup, dababy, or hikaru-nakamura.",
+    "No live style/evaluation suites yet for dababy or hikaru-nakamura.",
     "No model-based repetition-control suite yet.",
     "No source-grounding judge yet for quote/trait mapping."
   ],
@@ -122,7 +132,8 @@
       "v0.2.0": "personify plugin: portable persona source and host package generators",
       "v0.3.0": "persona activation packet, source workflow repackaging, CI artifact publishing",
       "v0.3.1": "reduce persona repetition traps, block mechanical repetition in contract test",
-      "v0.4.0": "yoda style test runner, versioning enforcement hook and CI check"
+      "v0.4.0": "yoda style test runner, versioning enforcement hook and CI check",
+      "v0.5.0": "activation benchmark reporting, bundled persona curation, and george-hotz draft pack"
     }
   }
 }

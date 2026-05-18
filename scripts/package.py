@@ -39,12 +39,12 @@ COMMANDS = {
     "use-persona": {
         "argument_hint": "<persona> [session goal]",
         "description": "Use a Personify persona as the default voice and reasoning lens for the session.",
-        "prompt": "Use the use-persona skill to activate this persona for the session. Load the matching pack and construct the Persona Activation Packet before applying it. User arguments: $ARGUMENTS",
+        "prompt": "Use the use-persona skill to activate this persona for the session: resolve the matching pack, construct the Persona Activation Packet, and apply the requested scope after the user's task and project instructions. User arguments: $ARGUMENTS",
     },
     "as-persona": {
         "argument_hint": "<persona> <task>",
         "description": "Apply a Personify persona to the current task or thread.",
-        "prompt": "Use the as-persona skill to apply this persona overlay for the requested scope. Load the matching pack and construct the Persona Activation Packet before answering. User arguments: $ARGUMENTS",
+        "prompt": "Use the as-persona skill to apply this persona overlay for the requested scope: resolve the matching pack, construct the Persona Activation Packet, and apply the requested scope after the user's task and project instructions. User arguments: $ARGUMENTS",
     },
     "extract-persona": {
         "argument_hint": "<person-or-character> [role/use-case]",
@@ -370,8 +370,9 @@ def gemini_context() -> str:
 Use `list-personas` to see bundled packs. Use `as-persona` for one task or
 `use-persona` for a whole session.
 
-When applying a persona, load the matching pack and construct the compact
-Persona Activation Packet described by the packaged skill before answering.
+When applying a persona, resolve the pack, construct the Persona Activation
+Packet, and apply the requested scope after the user's task and project
+instructions. The packaged skill owns the exact activation lifecycle.
 """
 
 

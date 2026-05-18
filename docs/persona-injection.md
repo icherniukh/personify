@@ -1,6 +1,6 @@
 # Persona Injection Model
 
-This document explains how `personify` applies a persona today.
+This document explains how `personify` activates a persona today.
 
 ## Short Version
 
@@ -11,11 +11,56 @@ It packages skills and commands that tell the assistant to:
 
 1. resolve a persona id,
 2. load the matching YAML pack,
-3. combine the user's task instructions with that pack,
-4. keep the selected pack active for the requested scope.
+3. construct a Persona Activation Packet,
+4. combine the user's task instructions with that pack,
+5. keep the selected pack active for the requested scope.
 
 The result is prompt-level composition. The persona becomes operating context for
 the assistant, not a new model, policy layer, or privileged instruction channel.
+
+## Activation Lifecycle
+
+Activation is an instruction sequence, not a hidden runtime switch.
+
+1. **Trigger:** the user invokes `use-persona`, `as-persona`, or a generated host
+   command that routes to one of those skills.
+2. **Resolve:** the assistant finds the requested pack by id or close name using
+   bundled packs first, then user-owned overrides.
+3. **Load:** the assistant reads the resolved YAML file. If the file is not read,
+   the persona is not fully active.
+4. **Render anchor:** the assistant builds a compact Persona Activation Packet
+   with the id, display name, scope, strength, pack path, voice markers, reasoning
+   habits, and drift-correction rule.
+5. **Compose:** task and project instructions stay first. The persona overlay is
+   applied after those instructions and cannot override higher-priority rules.
+6. **Carry:** for `session` or `thread` scope, the assistant keeps the compact
+   active-mode state in host conversation context.
+7. **Recover:** if the persona state fades or becomes generic, the assistant
+   reloads the resolved pack and reconstructs the activation packet before the
+   next substantive answer.
+
+Activation is not storage. The host conversation state is the storage mechanism,
+and the loaded pack plus activation packet are the recovery mechanism.
+
+## Scope Semantics
+
+`as-persona` defaults to `task` scope. It applies the selected pack to the current
+answer or immediate task and does not imply future turns should keep using it.
+
+`as-persona` may also be used for `thread` scope when the user asks for a persona
+to shape a short local exchange without becoming the session default.
+
+`use-persona` defaults to `session` scope. It makes the selected pack the default
+voice, stance, and reasoning lens until the user switches personas, asks for
+neutral mode, or the session ends.
+
+All scopes use the same composition order:
+
+```text
+task and project instructions
+Persona Activation Packet
+full personality overlay from the loaded pack
+```
 
 ## Source Layers
 
@@ -98,6 +143,26 @@ That packet is a test representation and composition convention, not a separate
 production runtime. It is useful because it makes the intended composition order
 explicit: task first, compact persona anchor second, full persona overlay third.
 
+## Difference From A System Prompt Prepend
+
+A plain system-prompt prepend is one block of text placed before the task. It is
+usually always-on, hard to inspect after the fact, and often blurs persona style,
+task instructions, and persistence rules into one paragraph.
+
+Personify is different in four concrete ways:
+
+- **Lazy activation:** persona content is loaded only when the user asks for a
+  persona. Listing packs does not activate them.
+- **Structured assets:** the source of behavior is a YAML pack with typed fields,
+  not an unstructured paragraph.
+- **Explicit scope:** `task`, `thread`, and `session` activation have different
+  persistence expectations.
+- **Drift correction:** the skills require a private per-reply check and pack
+  reload path when the output becomes generic.
+
+This does not make Personify a higher-priority instruction channel. It makes the
+prompt overlay easier to compose, test, and debug.
+
 ## Session-Wide Activation
 
 `use-persona` is the session bootstrap skill.
@@ -123,6 +188,19 @@ skill instructs the assistant to reload the pack and restore the active mode.
 The default scope is the current task. If the user wants the style to persist
 across the session, `use-persona` is the better entrypoint.
 
+## Host Matrix
+
+| Host | Generated surface | Activation behavior |
+| --- | --- | --- |
+| Codex | `.codex-plugin/plugin.json`, skills, commands | Commands route to source-derived skills; skills load packs and construct the Persona Activation Packet. |
+| Claude Code | `.claude-plugin/plugin.json`, marketplace metadata, skills | Plugin skills carry the same activation lifecycle and bundled reference packs. |
+| Gemini CLI | `gemini-extension.json`, `GEMINI.md`, commands, skills | `GEMINI.md` keeps the composition model nearby; commands route to the same skills. |
+| OpenCode | skills and commands under `opencode/` | Manual install copies generated skills and command adapters. |
+| Pi | package manifest and skills under `pi/` | Package manifest points at generated Personify skills. |
+
+Because these hosts differ, Personify's invariant is source-level composition,
+not identical filesystem layout in every generated package.
+
 ## What Personify Cannot Override
 
 Persona packs do not override:
@@ -137,24 +215,25 @@ Persona packs do not override:
 The persona can change delivery, emphasis, structure, and rhetorical habits. It
 cannot make forbidden actions allowed or make false claims acceptable.
 
-## Host Runtime Behavior
+## Debugging Activation
 
-The host runtimes package and discover the same concepts differently.
+When a persona appears weak or missing, check these in order:
 
-Claude Code plugins discover skills and commands from plugin directories. Claude
-also copies installed marketplace plugins into a local plugin cache, so packaged
-files should be self-contained and should not rely on paths outside the plugin.
+1. Was the correct entrypoint used: `use-persona` for session scope or
+   `as-persona` for task/thread scope?
+2. Did the assistant read the resolved pack file?
+3. Did a user-owned pack override the bundled pack?
+4. Was the pack hidden by `${XDG_CONFIG_HOME:-~/.config}/personify/hidden.yaml`?
+5. Did the response preserve task/project instructions before applying the
+   persona overlay?
+6. Did the response use at least one concrete voice marker and one reasoning or
+   structure habit from the pack?
+7. If the session is long, did the assistant reload the pack and reconstruct the
+   activation packet before continuing?
 
-Gemini extensions package context files, commands, and related files into an
-installable extension. Personify generates Gemini commands that route requests
-to the same persona skills.
-
-Codex plugins expose a plugin manifest, skills, and commands for the Codex
-runtime. Personify generates the Codex package from the same source tree rather
-than treating Codex as the source of truth.
-
-Because these hosts differ, Personify's invariant is source-level composition,
-not identical filesystem layout in every generated package.
+If the answer is still generic, the next improvement should be measured against
+a neutral baseline and a plain persona-prepend baseline. Do not claim the
+activation mechanism is better without output evidence.
 
 ## Current Limitations
 
@@ -169,6 +248,7 @@ Known improvement areas:
 - support user-defined asset roots without editing generated packages
 - improve generated commands so they pass clearer scope and persona arguments
 - add evaluation cases that test whether persona state survives multi-turn work
+- benchmark PAP plus self-check against a plain persona-prepend baseline
 - document host-specific install/update/cache behavior before public release
 
 ## Practical Mental Model

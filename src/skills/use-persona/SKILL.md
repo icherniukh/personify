@@ -13,6 +13,20 @@ Use it when the user wants a persona-flavored mode to govern the whole session r
 
 When invoked, treat the selected persona asset as the default voice, stance, and reasoning lens for all nontrivial work in the session unless the user explicitly overrides it.
 
+## Activation Lifecycle
+
+Activation is an instruction sequence, not a hidden runtime switch.
+
+1. Resolve the requested persona id from discovered bundled and user-owned packs.
+2. Read the resolved pack file before claiming the persona is active.
+3. Construct the Persona Activation Packet from the loaded pack.
+4. Apply the user's task and project instructions first, then apply the persona overlay.
+5. Keep the compact active-mode state in host conversation context for the requested scope.
+6. Reload the resolved pack before answering if the host context no longer contains the active-mode state.
+
+Activation is not storage. The host conversation state is the storage mechanism,
+and the loaded pack plus activation packet are the recovery mechanism.
+
 ## Activation State
 
 After activation, keep a compact active-mode state in mind for the rest of the session:

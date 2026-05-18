@@ -1,6 +1,6 @@
 {
   "name": "personify",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Portable persona packs for Claude Code with Personify persona skills.",
   "author": {
     "name": "icherniukh"

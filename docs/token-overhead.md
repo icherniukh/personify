@@ -27,10 +27,10 @@ python3 scripts/token_overhead.py --markdown
 
 | Persona | Neutral tokens | With persona | Overhead |
 | --- | ---: | ---: | ---: |
-| `bjarne-stroustrup` | 31 | 930 | +899 |
 | `dababy` | 31 | 2984 | +2953 |
+| `george-hotz` | 31 | 986 | +955 |
 | `hikaru-nakamura` | 31 | 1715 | +1684 |
 | `jesse-pinkman` | 31 | 3027 | +2996 |
 | `leon` | 31 | 2047 | +2016 |
 | `sam-harris` | 31 | 1195 | +1164 |
-| `yoda` | 31 | 1478 | +1447 |
+| `yoda` | 31 | 1689 | +1658 |

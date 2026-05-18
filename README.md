@@ -67,6 +67,8 @@ python3 scripts/package.py build --target all
 
 Pack format: `docs/personality-pack-contract.md`
 
+Activation model: `docs/persona-injection.md`
+
 Persona activation adds prompt context. See `docs/token-overhead.md` for the
 current per-pack overhead estimate and the calculation method.
 

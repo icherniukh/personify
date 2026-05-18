@@ -81,9 +81,20 @@ def main() -> None:
 
     print("5. command adapters")
     for command_name in EXPECTED_COMMANDS:
-        assert (ROOT_DIR / "codex" / "commands" / f"{command_name}.md").is_file()
-        assert (ROOT_DIR / "gemini" / "commands" / f"{command_name}.toml").is_file()
-        assert (ROOT_DIR / "opencode" / "commands" / f"{command_name}.md").is_file()
+        codex_command = ROOT_DIR / "codex" / "commands" / f"{command_name}.md"
+        gemini_command = ROOT_DIR / "gemini" / "commands" / f"{command_name}.toml"
+        opencode_command = ROOT_DIR / "opencode" / "commands" / f"{command_name}.md"
+        assert codex_command.is_file()
+        assert gemini_command.is_file()
+        assert opencode_command.is_file()
+        if command_name in {"use-persona", "as-persona"}:
+            for command_file in (codex_command, gemini_command, opencode_command):
+                command_text = command_file.read_text(encoding="utf-8")
+                assert "resolve the matching pack" in command_text
+                assert "construct the Persona Activation Packet" in command_text
+                assert "apply the requested scope" in command_text
+    gemini_context = " ".join((ROOT_DIR / "gemini" / "GEMINI.md").read_text(encoding="utf-8").split())
+    assert "resolve the pack, construct the Persona Activation Packet, and apply the requested scope" in gemini_context
     print("ok")
 
     print("6a. opencode skill layout")

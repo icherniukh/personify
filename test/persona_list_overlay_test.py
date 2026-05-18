@@ -38,7 +38,7 @@ def main() -> None:
 
         hidden_file = Path(config_home) / "personify" / "hidden.yaml"
         hidden_file.parent.mkdir(parents=True, exist_ok=True)
-        hidden_file.write_text("hidden:\n  - bjarne-stroustrup\n", encoding="utf-8")
+        hidden_file.write_text("hidden:\n  - sam-harris\n", encoding="utf-8")
 
         env = os.environ.copy()
         env["XDG_DATA_HOME"] = data_home
@@ -66,7 +66,7 @@ def main() -> None:
     print("ok")
 
     print("3. tombstones hide matching bundled ids")
-    assert "bjarne-stroustrup" not in by_id
+    assert "sam-harris" not in by_id
     print("ok")
 
     print("=== persona list overlay test passed ===")

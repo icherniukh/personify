@@ -8,7 +8,6 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parents[1]
 SAM_PACK = ROOT_DIR / "src" / "assets" / "personalities" / "sam-harris.yaml"
 JESSE_PACK = ROOT_DIR / "src" / "assets" / "personalities" / "jesse-pinkman.yaml"
-BJARNE_PACK = ROOT_DIR / "src" / "assets" / "personalities" / "bjarne-stroustrup.yaml"
 YODA_PACK = ROOT_DIR / "src" / "assets" / "personalities" / "yoda.yaml"
 NEUTRAL_TASK = """You are a neutral assistant. Complete the user's task correctly, clearly, and without applying a specific persona overlay."""
 
@@ -265,10 +264,6 @@ def load_packet(pack_path: Path | None = None, task: str = NEUTRAL_TASK) -> str:
 
 def load_architecture_neutral_packet() -> str:
     return load_packet(task="Review the architecture clearly and concretely.")
-
-
-def load_bjarne_architecture_packet() -> str:
-    return load_packet(BJARNE_PACK, task="Review the architecture clearly and concretely.")
 
 
 def load_yoda_architecture_packet() -> str:

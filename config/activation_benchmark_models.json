@@ -1,0 +1,24 @@
+{
+  "openrouter": {
+    "pairs": [
+      {
+        "name": "grok-generator-kimi-judge",
+        "model": "x-ai/grok-4.3",
+        "judge_model": "moonshotai/kimi-k2.6",
+        "notes": "Default cheap-but-capable pair. Grok generates, Kimi judges."
+      },
+      {
+        "name": "kimi-generator-grok-judge",
+        "model": "moonshotai/kimi-k2.6",
+        "judge_model": "x-ai/grok-4.3",
+        "notes": "Reverse pair to check model-role sensitivity."
+      },
+      {
+        "name": "deepseek-generator-grok-judge",
+        "model": "deepseek/deepseek-v4-pro",
+        "judge_model": "x-ai/grok-4.3",
+        "notes": "Low-cost alternative generator for rotation."
+      }
+    ]
+  }
+}

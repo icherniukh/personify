@@ -1,6 +1,6 @@
 {
   "name": "personify",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Portable persona packs and adapters that make agent responses adopt a selected voice, cadence, and reasoning lens",
   "author": {
     "name": "icherniukh",

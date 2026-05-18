@@ -84,4 +84,8 @@ python3 "$ROOT_DIR/test/claude_plugin_test.py"
 echo "12. live model runner dry run"
 python3 "$ROOT_DIR/test/live_model_test.py" --dry-run
 
+echo "13. activation benchmark dry run"
+python3 "$ROOT_DIR/test/activation_benchmark_test.py"
+python3 "$ROOT_DIR/test/activation_benchmark.py" --api openrouter --dry-run --persona sam-harris --case hidden-assumption
+
 echo "=== smoke test passed ==="
