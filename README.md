@@ -46,7 +46,7 @@ pi install git:github.com/icherniukh/personify
 | `list-personas` | Show available persona packs |
 | `use-persona <persona>` | Set a persona as the default for the session |
 | `as-persona <persona> <task>` | Apply a persona to one task |
-| `extract-persona <name>` | Create a new pack from web-grounded research |
+| `extract-persona <name>` | Research a person or character into a reusable source store and build a layered, evidence-mapped pack |
 
 Examples:
 
@@ -65,7 +65,12 @@ Source lives in `src/`. After editing run:
 python3 scripts/package.py build --target all
 ```
 
-Pack format: `docs/personality-pack-contract.md`
+Pack format: `docs/personality-pack-contract.md` (schema v1 and v2:
+`src/skills/extract-persona/references/persona-pack.schema.json`)
+
+Persona extraction (research store, stylometry, layered packs): `docs/extract-persona.md`
+
+Changes: `CHANGELOG.md`
 
 Activation model: `docs/persona-injection.md`
 

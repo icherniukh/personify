@@ -164,6 +164,16 @@ Examples:
 - `For this session, use Yoda.`
 - `Use Hikaru Nakamura as the default persona.`
 
+## Layered Packs (schema v2)
+
+Packs with `schema_version: 2` (written by `extract-persona`) keep every field above and add a layer plan under `layers`:
+
+- `core` (always) and `standard` (by default): load these for activation. Build the voice markers from `core.voice_markers` when present.
+- `extended` (on request): `idiolect`, `humor`, `under_pressure`, `stances`, `voice_calibration`, `example_utterances` and the rest. Read them when the task needs depth, when the voice drifts generic, or when the user asks for a stronger or more faithful persona.
+- `retrievable` (per turn): when `retrieval.inject_when` applies, run the `retrieval.command` (the `extract-persona` skill's `scripts/persona_extract.py retrieve <id> "<query>"`) and use at most `retrieval.top_k` results within `retrieval.max_injected_tokens`. Skip this silently if the research store is not on this machine.
+
+`example_utterances` and retrieved lines are marked `shape-not-lines`: use them for rhythm, length and stance, and do not paste them into replies.
+
 ## Bootstrap Workflow
 
 1. Identify the requested mode:

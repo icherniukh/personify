@@ -1,0 +1,757 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/icherniukh/personify/schemas/persona-pack.schema.json",
+  "title": "Personify persona pack",
+  "description": "v1 = the original contract (docs/personality-pack-contract.md). v2 (schema_version: 2) keeps every v1 field and adds a token-aware layer plan, an evidence-mapped idiolect/stance/pressure profile, shape-not-lines examples and a retrieval pointer into the research corpus. See docs/extract-persona.md.",
+  "x-personify-version": "0.6.0",
+  "type": "object",
+  "required": [
+    "id",
+    "display_name",
+    "summary",
+    "voice",
+    "interaction_stance",
+    "value_profile",
+    "reasoning_style",
+    "preferred_terminology",
+    "speech_patterns",
+    "default_structures",
+    "ambiguity_policy",
+    "tradeoff_policy",
+    "compression_policy",
+    "interaction_rules",
+    "prompt_overlay",
+    "provenance",
+    "quality_level"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "enum": [
+        1,
+        2
+      ]
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "voice": {
+      "type": [
+        "object",
+        "string"
+      ]
+    },
+    "interaction_stance": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "value_profile": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "reasoning_style": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "preferred_terminology": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "speech_patterns": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "default_structures": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "interaction_rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "ambiguity_policy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tradeoff_policy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "compression_policy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "prompt_overlay": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "source_type"
+      ],
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        },
+        "source_records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source_record"
+          }
+        },
+        "extraction": {
+          "$ref": "#/$defs/extraction"
+        }
+      }
+    },
+    "quality_level": {
+      "enum": [
+        "draft",
+        "reviewed",
+        "research-backed"
+      ]
+    },
+    "core": {
+      "$ref": "#/$defs/core"
+    },
+    "idiolect": {
+      "$ref": "#/$defs/idiolect"
+    },
+    "humor": {
+      "$ref": "#/$defs/humor"
+    },
+    "stances": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "position"
+        ],
+        "properties": {
+          "position": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence": {
+            "$ref": "#/$defs/evidence"
+          },
+          "inferred": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string",
+            "minLength": 1
+          },
+          "confidence": {
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "as_of": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "knowledge_boundaries": {
+      "type": "object",
+      "properties": {
+        "knows": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "does_not_know": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "as_of": {
+          "type": "string"
+        }
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "relation"
+        ],
+        "properties": {
+          "relation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence": {
+            "$ref": "#/$defs/evidence"
+          },
+          "inferred": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          },
+          "who": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "under_pressure": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "behavior"
+        ],
+        "properties": {
+          "behavior": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence": {
+            "$ref": "#/$defs/evidence"
+          },
+          "inferred": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "contradictions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "tension"
+        ],
+        "properties": {
+          "tension": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence": {
+            "$ref": "#/$defs/evidence"
+          },
+          "inferred": {
+            "type": "boolean"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "voice_calibration": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "sounds_like",
+          "not_like"
+        ],
+        "properties": {
+          "sounds_like": {
+            "type": "string",
+            "minLength": 1
+          },
+          "not_like": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "example_utterances": {
+      "$ref": "#/$defs/examples"
+    },
+    "retrieval": {
+      "$ref": "#/$defs/retrieval"
+    },
+    "layers": {
+      "$ref": "#/$defs/layers"
+    }
+  },
+  "allOf": [
+    {
+      "not": {
+        "required": [
+          "guardrails"
+        ]
+      },
+      "notMessage": "forbidden field 'guardrails' (no pack-level restriction sections; see docs/personality-pack-contract.md)"
+    },
+    {
+      "not": {
+        "required": [
+          "anti_patterns"
+        ]
+      },
+      "notMessage": "forbidden field 'anti_patterns' (no pack-level restriction sections; see docs/personality-pack-contract.md)"
+    }
+  ],
+  "if": {
+    "required": [
+      "schema_version"
+    ],
+    "properties": {
+      "schema_version": {
+        "const": 2
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "core",
+      "layers"
+    ],
+    "properties": {
+      "provenance": {
+        "required": [
+          "source_type",
+          "extraction"
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^(src-[0-9a-f]{12}(#c[0-9]+)?|u-[0-9a-f]{8}-[0-9]+)$"
+      }
+    },
+    "core": {
+      "type": "object",
+      "required": [
+        "identity"
+      ],
+      "properties": {
+        "identity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "voice_markers": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "reasoning_habits": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "idiolect": {
+      "type": "object",
+      "properties": {
+        "signature_phrases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "phrase"
+            ],
+            "properties": {
+              "phrase": {
+                "type": "string",
+                "minLength": 1
+              },
+              "evidence": {
+                "$ref": "#/$defs/evidence"
+              },
+              "inferred": {
+                "type": "boolean"
+              },
+              "note": {
+                "type": "string"
+              },
+              "frequency": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "use": {
+                "enum": [
+                  "sparingly",
+                  "regularly",
+                  "signature"
+                ]
+              }
+            }
+          }
+        },
+        "sentence_patterns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "pattern"
+            ],
+            "properties": {
+              "pattern": {
+                "type": "string",
+                "minLength": 1
+              },
+              "evidence": {
+                "$ref": "#/$defs/evidence"
+              },
+              "inferred": {
+                "type": "boolean"
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "discourse_markers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "stylometry": {
+          "type": "object",
+          "required": [
+            "basis",
+            "basis_words"
+          ],
+          "properties": {
+            "basis": {
+              "enum": [
+                "verbatim",
+                "secondary",
+                "none"
+              ]
+            },
+            "basis_words": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "humor": {
+      "type": "object",
+      "properties": {
+        "mechanisms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "mechanism"
+            ],
+            "properties": {
+              "mechanism": {
+                "type": "string",
+                "minLength": 1
+              },
+              "evidence": {
+                "$ref": "#/$defs/evidence"
+              },
+              "inferred": {
+                "type": "boolean"
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "frequency": {
+          "type": "string"
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lands_when": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "examples": {
+      "type": "object",
+      "required": [
+        "usage",
+        "items"
+      ],
+      "properties": {
+        "usage": {
+          "const": "shape-not-lines"
+        },
+        "note": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "required": [
+              "text",
+              "evidence"
+            ],
+            "properties": {
+              "text": {
+                "type": "string",
+                "minLength": 1
+              },
+              "evidence": {
+                "type": "string",
+                "pattern": "^u-[0-9a-f]{8}-[0-9]+$"
+              },
+              "context": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "retrieval": {
+      "type": "object",
+      "required": [
+        "store",
+        "method",
+        "top_k",
+        "max_injected_tokens"
+      ],
+      "properties": {
+        "store": {
+          "type": "string",
+          "minLength": 1
+        },
+        "corpus_sha": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "chunks": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "utterances": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "method": {
+          "enum": [
+            "bm25",
+            "embeddings",
+            "hybrid"
+          ]
+        },
+        "embeddings": {
+          "type": [
+            "object",
+            "string",
+            "null"
+          ]
+        },
+        "top_k": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "max_injected_tokens": {
+          "type": "integer",
+          "minimum": 50,
+          "maximum": 2000
+        },
+        "command": {
+          "type": "string"
+        },
+        "inject_when": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "layer": {
+      "type": "object",
+      "required": [
+        "budget_tokens",
+        "fields"
+      ],
+      "properties": {
+        "budget_tokens": {
+          "type": "integer",
+          "minimum": 50
+        },
+        "load": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "layers": {
+      "type": "object",
+      "required": [
+        "core",
+        "standard",
+        "extended"
+      ],
+      "properties": {
+        "core": {
+          "$ref": "#/$defs/layer"
+        },
+        "standard": {
+          "$ref": "#/$defs/layer"
+        },
+        "extended": {
+          "$ref": "#/$defs/layer"
+        },
+        "retrievable": {
+          "type": "object"
+        }
+      }
+    },
+    "source_record": {
+      "type": "object",
+      "required": [
+        "id",
+        "source_type",
+        "attribution"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^src-[0-9a-f]{12}$"
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attribution": {
+          "enum": [
+            "subject",
+            "mixed",
+            "about"
+          ]
+        },
+        "voice": {
+          "enum": [
+            "verbatim",
+            "paraphrase",
+            "summary"
+          ]
+        }
+      }
+    },
+    "extraction": {
+      "type": "object",
+      "required": [
+        "tool_version",
+        "pack_schema_version"
+      ],
+      "properties": {
+        "tool_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pack_schema_version": {
+          "type": "integer"
+        },
+        "corpus_sha": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}
