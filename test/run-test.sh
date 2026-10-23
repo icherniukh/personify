@@ -72,6 +72,9 @@ python3 "$ROOT_DIR/test/behavior_test.py"
 echo "8. extractor test"
 python3 "$ROOT_DIR/test/extractor_test.py"
 
+echo "8b. extract-persona store/corpus/schema test"
+python3 "$ROOT_DIR/test/extract_persona_test.py"
+
 echo "9. personality listing script"
 python3 "$ROOT_DIR/scripts/persona_list.py"
 

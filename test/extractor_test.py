@@ -27,6 +27,28 @@ def main() -> None:
     assert_contains(online_text, "name: extract-persona")
     print("ok")
 
+    print("2. extractor keeps a research store, measures voice, and assembles a layered pack")
+    for needle in (
+        "personify/research/<id>/",
+        "scripts/persona_extract.py",
+        "references/persona-pack.schema.json",
+        "--attribution subject|mixed|about",
+        "Run `status <id>`",
+        "Run `profile <id>`",
+        "evidence ids",
+        "inferred\": true",
+        "usage: shape-not-lines",
+        "$X assemble <id> --analysis analysis.json",
+        "migrate <pack> --out <pack>",
+        "At least one pressure or conflict context",
+        "Do not include `guardrails`, `anti_patterns`",
+        "${XDG_DATA_HOME:-~/.local/share}/personify/personas/<id>.yaml",
+    ):
+        assert_contains(online_text, needle)
+    assert (ROOT_DIR / "src" / "skills" / "extract-persona" / "scripts" / "persona_extract.py").is_file()
+    assert (ROOT_DIR / "src" / "skills" / "extract-persona" / "references" / "persona-pack.schema.json").is_file()
+    print("ok")
+
     print("=== extractor test passed ===")
 
 

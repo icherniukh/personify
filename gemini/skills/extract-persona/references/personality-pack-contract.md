@@ -191,6 +191,32 @@ Minimum validation should check:
 - `quality_level` uses an allowed maturity marker
 - YAML parses cleanly
 - generated package copies match source packs
+- the pack validates against `persona-pack.schema.json` (v1 and v2)
+
+## Schema v2: Layered Extension (optional)
+
+Packs written by `extract-persona` since 0.6.0 set `schema_version: 2`. A v2
+pack keeps every required field above unchanged, so v1 readers keep working,
+and adds:
+
+- `core`: `identity`, `voice_markers`, `reasoning_habits`; the always-loaded layer
+- `idiolect` (signature phrases, sentence patterns, discourse markers, measured
+  stylometry), `humor`, `stances`, `under_pressure`, `contradictions`,
+  `knowledge_boundaries`, `relationships`, `voice_calibration`
+- `example_utterances` with `usage: shape-not-lines`
+- `retrieval`: pointer into the research store and the per-turn retrieve command
+- `layers`: `core` / `standard` / `extended` / `retrievable`, with token budgets
+- `provenance.source_records` and `provenance.extraction`
+
+Evidence-bearing items carry evidence ids into the research store, or
+`inferred: true`. `voice_calibration` is a style contrast ("sounds like" versus
+"not like"), not a restriction section; the no-guardrails rule still applies.
+
+Machine-readable schema for v1 and v2:
+`src/skills/extract-persona/references/persona-pack.schema.json`. Validate with
+`python3 src/skills/extract-persona/scripts/persona_extract.py validate <pack.yaml>`.
+Migrate a v1 pack with `... migrate <pack.yaml> --out <pack.yaml>`. Design and
+research mapping: `docs/extract-persona.md`.
 
 ## Design Rule
 

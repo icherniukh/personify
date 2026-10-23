@@ -141,7 +141,25 @@ def main() -> None:
         for key in sorted(BLOCK_SECTIONS):
             assert has_block_content(lines, key), f"{path.name}: {key} must contain block content"
 
+    schema_errors = schema_validate(paths)
+    assert not schema_errors, "schema validation failed:\n" + "\n".join(schema_errors)
+
     print(f"ok: {len(paths)} packs validated")
+
+
+def schema_validate(paths: list[Path]) -> list[str]:
+    """Validate every pack against the v1/v2 JSON Schema shipped with extract-persona."""
+    import importlib.util
+
+    script = ROOT_DIR / "src" / "skills" / "extract-persona" / "scripts" / "persona_extract.py"
+    spec = importlib.util.spec_from_file_location("persona_extract", script)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    errors: list[str] = []
+    for path in paths:
+        errors += [f"{path.name}: {e}" for e in module.validate_pack(module.load_pack_file(path))]
+    return errors
 
 
 if __name__ == "__main__":

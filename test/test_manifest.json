@@ -29,7 +29,8 @@
             "active_pack_schema",
             "duplicate_ids",
             "forbidden_guardrail_fields",
-            "archive_exclusion"
+            "archive_exclusion",
+            "json_schema_v1_v2"
           ]
         },
         {
@@ -46,7 +47,28 @@
           "id": "extractor",
           "script": "extractor_test.py",
           "what_it_checks": [
-            "research_backed_pack_creation_guidance"
+            "research_backed_pack_creation_guidance",
+            "research_store_workflow",
+            "shape_not_lines_examples",
+            "layered_pack_output"
+          ]
+        },
+        {
+          "id": "extract-persona",
+          "script": "extract_persona_test.py",
+          "what_it_checks": [
+            "source_store_provenance_and_dedupe",
+            "speaker_attribution",
+            "incremental_index_stable_ids",
+            "coverage_gate",
+            "stylometry_signature_phrases",
+            "bm25_retrieval_budget",
+            "v2_pack_assembly_and_schema",
+            "evidence_grounding",
+            "layer_budget_trimming",
+            "v1_backward_compat_and_migration",
+            "yaml_round_trip",
+            "offline_only"
           ]
         }
       ]
@@ -113,7 +135,9 @@
   "known_gaps": [
     "No live style/evaluation suites yet for dababy or hikaru-nakamura.",
     "No model-based repetition-control suite yet.",
-    "No source-grounding judge yet for quote/trait mapping."
+    "No source-grounding judge yet for quote/trait mapping.",
+    "No model-based comparison yet of v2 (layered, retrieval-backed) packs against v1 packs; v2 fidelity gains are untested.",
+    "Several bundled packs are not strict YAML (PyYAML rejects george-hotz, hikaru-nakamura, jesse-pinkman, leon; dababy has list items that strict YAML reads as maps). Repo parsers are line-based so this is latent; `persona_extract.py migrate` rewrites a pack as strict YAML."
   ],
   "versioning": {
     "convention": "semver pre-1.0: v0.MINOR.PATCH",
@@ -133,7 +157,8 @@
       "v0.3.0": "persona activation packet, source workflow repackaging, CI artifact publishing",
       "v0.3.1": "reduce persona repetition traps, block mechanical repetition in contract test",
       "v0.4.0": "yoda style test runner, versioning enforcement hook and CI check",
-      "v0.5.0": "activation benchmark reporting, bundled persona curation, and george-hotz draft pack"
+      "v0.5.0": "activation benchmark reporting, bundled persona curation, and george-hotz draft pack",
+      "v0.6.0": "extract-persona v2: research store + chunked/utterance corpus, stylometry, BM25 retrieval, layered token-budgeted pack schema v2 with JSON Schema, v1 migration"
     }
   }
 }
